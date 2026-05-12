@@ -1,0 +1,15 @@
+{
+  "prometheus_url": "http://localhost:9090",
+  "vmid": "101",
+  "node_name": "pve",
+  "query_step": "1m",
+  "network_device": "eth0",
+  "network_latency_threshold_ms": 500,
+  "network_retrans_threshold": 5,
+  "website_url": "http://localhost",
+  "storage_device": "/dev/mapper/pve-vm--100--disk--0",
+  "job_name": "CT100_Website_Server",
+  "label_selector": "",
+  "storage_mountpoint": "/",
+  "network_max_bytes_per_sec": 125000000
+}

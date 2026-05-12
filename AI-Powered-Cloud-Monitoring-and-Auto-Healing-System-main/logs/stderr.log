@@ -1,0 +1,12 @@
+[DETECTION] AI anomaly detected (score=-0.7502)
+[HYSTERESIS] Anomaly detected (1/3). Waiting for confirmation...
+[DETECTION] AI anomaly detected (score=-0.7502)
+[HYSTERESIS] Anomaly detected (2/3). Waiting for confirmation...
+[DETECTION] AI anomaly detected (score=-0.7507)
+[ACTION] [Level 1] Attempting Recovery for Service: app-container (Retry 1/3)
+[ACTION] Verified restart process failed for app-container: Command '['docker', 'restart', 'app-container']' returned non-zero exit status 1.
+[ACTION] Level 1 verification failed. Escalating immediately...
+[STABILIZATION] Verification failed. Skipping stabilization window to expedite recovery.
+[DETECTION] AI anomaly detected (score=-0.7507)
+[ACTION] [Level 2] Process Reset: Identifying high-resource PIDs in LXC 101
+Process reset failed in LXC 101: 501 Not Implemented: Method 'POST /nodes/pve/lxc/101/exec' not implemented

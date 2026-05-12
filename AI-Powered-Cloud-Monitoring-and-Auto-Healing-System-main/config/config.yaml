@@ -1,0 +1,45 @@
+# Infrastructure Layer
+proxmox:
+  host: "127.0.0.1"
+  port: 8006
+  user: "root@pam"
+  password: "Syahmi0367"  # Placeholder
+  vmid: 101
+  node: "pve"
+  verify_ssl: false
+
+# Data Collection Layer
+monitoring:
+  interval: 60  # Seconds
+  service_name: "app-container"
+  save_to_csv: true
+  csv_path: "data/metrics.csv"
+  demo_mode: true  # If true, overrides interval to 2s and cooldown to 30s
+  demo_interval: 2
+  demo_cooldown: 30
+
+# AI/ML Layer
+ai:
+  model_path: "models/isolation_forest.pkl"
+  westermo_path: "data/westermo/system-1.csv"
+  retrain_interval: 10  # Number of monitoring cycles
+  rolling_buffer_size: 1000  # Online Learning buffer
+  anomaly_threshold: -0.75  # Calibrated for OptiPlex 7060 idle states
+
+# Auto-Healing Layer (Policy Engine)
+policies:
+  cooldown_period: 90  # Seconds
+  max_retries: 2       # For Level 1
+  monitoring_infrastructure: ["prometheus", "grafana", "influxdb"]
+  docker_containers: ["prometheus", "grafana", "app-container"]
+  escalation_paths:
+    cpu: [1, 2, 4, 5]
+    memory: [1, 2, 4, 5]
+    storage: [1, 2, 4, 5]
+    network: [1, 3, 4, 5]
+
+# Logging
+logging:
+  level: "INFO"
+  log_file: "logs/system.log"
+  audit_log: true
