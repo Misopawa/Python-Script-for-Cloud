@@ -1,5 +1,6 @@
 ﻿import time
 import datetime
+import logging
 
 from data.collector import DataCollector
 from logic.detector import ThresholdEngine
@@ -11,7 +12,8 @@ def main():
     engine = ThresholdEngine()
     healer = PolicyHealer()
 
-    print("🚀 AI-Powered Monitoring Started. 48-Hour Calibration Active.")
+    logger = logging.getLogger(__name__)
+    logger.info("🚀 AI-Powered Monitoring Started. 48-Hour Calibration Active.")
 
     try:
         while True:

@@ -1,70 +1,40 @@
-import datetime
+import joblib
+import os
+import numpy as np
 from typing import Dict, Optional
 
-import numpy as np
-
-
 class ThresholdEngine:
-    MIN_THRESH = 70.0
-    MAX_THRESH = 95.0
-    STUDY_DURATION_SECONDS = 172800
-
-    def __init__(self):
-        self.study_duration = self.STUDY_DURATION_SECONDS
-        self.start_time = datetime.datetime.now()
-        self.history: Dict[str, list] = {
-            "CPU": [],
-            "MEMORY": [],
-            "STORAGE": [],
-            "NETWORK": [],
-        }
-        self.active_thresholds: Dict[str, float] = {
-            "CPU": float(self.MIN_THRESH),
-            "MEMORY": float(self.MIN_THRESH),
-            "STORAGE": float(self.MIN_THRESH),
-            "NETWORK": float(self.MIN_THRESH),
-        }
+    def __init__(self, model_path="isolation_forest.pkl"):
+        self.active_thresholds = {"CPU": 0.0, "MEMORY": 0.0, "STORAGE": 0.0, "NETWORK": 0.0}
+        
+        if os.path.exists(model_path):
+            print("🧠 Isolation Forest Model Loaded Successfully.")
+            self.model = joblib.load(model_path)
+        else:
+            print(f"⚠️ CRITICAL: {model_path} not found! Run train_model.py first.")
+            self.model = None
 
     def record_data_point(self, current_metrics: Optional[Dict[str, float]]) -> None:
-        if not isinstance(current_metrics, dict):
-            return
-
-        for metric in self.history:
-            try:
-                value = float(current_metrics.get(metric, 0.0))
-            except Exception:
-                continue
-            self.history[metric].append(value)
+        pass 
 
     def update_thresholds(self) -> None:
-        elapsed_seconds = (datetime.datetime.now() - self.start_time).total_seconds()
-        if elapsed_seconds < self.study_duration:
-            return
-
-        for metric, values in self.history.items():
-            if not values:
-                continue
-
-            try:
-                p95 = float(np.percentile(np.array(values, dtype=np.float64), 95))
-            except Exception:
-                continue
-
-            new_thresh = max(self.MIN_THRESH, min(self.MAX_THRESH, p95 + 2.0))
-            self.active_thresholds[metric] = float(new_thresh)
+        pass
 
     def evaluate_state(self, current_metrics: Optional[Dict[str, float]]) -> Optional[str]:
-        if not isinstance(current_metrics, dict):
+        if not self.model or not isinstance(current_metrics, dict):
             return None
 
-        for metric in ["CPU", "MEMORY", "STORAGE", "NETWORK"]:
-            try:
-                metric_value = float(current_metrics.get(metric, 0.0))
-            except Exception:
-                metric_value = 0.0
+        cpu = float(current_metrics.get("CPU", 0.0))
+        mem = float(current_metrics.get("MEMORY", 0.0))
+        stg = float(current_metrics.get("STORAGE", 0.0))
+        net = float(current_metrics.get("NETWORK", 0.0))
 
-            threshold = float(self.active_thresholds.get(metric, self.MIN_THRESH))
-            if metric_value > threshold:
-                return metric
+        features = np.array([[cpu, mem, stg, net]])
+
+        prediction = self.model.predict(features)[0]
+
+        if prediction == -1:
+            culprit = max(current_metrics, key=current_metrics.get)
+            return culprit
 
         return None
