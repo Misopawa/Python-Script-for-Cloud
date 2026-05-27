@@ -35,9 +35,27 @@ class PolicyEngine:
 
         # Track state for escalation
         self.retries = 0
-        self.current_level_idx = 0
+        self.current_level_idx = 0 
         self.last_anomaly_type = None
-        self.max_retries = self.policy_cfg.get('max_retries', 2)
+        
+        # --- CHAPTER 3 IMPLEMENTATION ---
+        # 1. Non-Linear Escalation Paths (Table 3.5)
+        self.escalation_paths = {
+            "cpu": [1, 2, 4, 5],
+            "memory": [1, 2, 4, 5],
+            "storage": [1, 2, 4, 5],
+            "network": [1, 3, 4, 5],
+            "general": [1, 2, 3, 4, 5]
+        }
+        
+        # 2. Specific Retry Limits per Level (Table 3.1)
+        self.max_retries_per_level = {
+            1: 2,  # Level 1 allows exactly 2 retries
+            2: 1,  # Level 2 allows 1 retry
+            3: 1,  # Level 3 allows 1 retry
+            4: 1,  # Level 4 allows 1 retry
+            5: 0   # Level 5 is the failsafe; 0 retries, immediate halt
+        }
         
         # Hysteresis Logic: 3 consecutive anomalies required for Level 1
         self.anomaly_counter = 0
@@ -310,12 +328,36 @@ class PolicyEngine:
         except Exception:
             threshold_pct = 70.0
 
-        next_level = min(5, max(1, int(self.current_level or 0) + 1))
-        self.current_level = int(next_level)
-        self.current_level_idx = max(0, int(self.current_level) - 1)
-
+        # Determine Anomaly Type for Routing
         mapping = {"CPU": "cpu", "MEMORY": "memory", "STORAGE": "storage", "NETWORK": "network"}
         anomaly_type = mapping.get(str(triggered_metric).upper(), "general")
+        
+        # Fetch the correct non-linear path (e.g., Network = [1, 3, 4, 5])
+        path = self.escalation_paths.get(anomaly_type, self.escalation_paths["general"])
+        
+        # Set initial level if starting fresh
+        if self.current_level == 0:
+            self.current_level_idx = 0
+            self.current_level = path[self.current_level_idx]
+            self.retries = 0
+        else:
+            # Check if we have exhausted retries for the CURRENT level
+            allowed_retries = self.max_retries_per_level.get(self.current_level, 0)
+            
+            if self.retries < allowed_retries:
+                # Retry the same level
+                self.retries += 1
+                logger.info(f"Retrying Level {self.current_level} (Attempt {self.retries}/{allowed_retries})")
+            else:
+                # Retries exhausted, escalate to the NEXT level in the path
+                self.current_level_idx += 1
+                self.retries = 0 # Reset retries for the new level
+                
+                # Check if we hit the end of the path
+                if self.current_level_idx >= len(path):
+                    self.current_level = 5 # Force Level 5 Failsafe
+                else:
+                    self.current_level = path[self.current_level_idx]
 
         if self.notifier:
             learned_text = "Learned from high-load study" if study_active else "Fixed floor"
@@ -324,10 +366,11 @@ class PolicyEngine:
                 f"Metric: [{triggered_metric}]\n"
                 f"Value: {value_pct:.1f}%\n"
                 f"Limit: {threshold_pct:.1f}% ({learned_text})\n"
-                f"Escalating to Level {self.current_level}.",
+                f"Executing Level {self.current_level} Recovery.",
                 min_interval_seconds=60,
             )
 
+        # Trigger the action and save state
         action_taken = self._trigger_level_action(self.current_level, anomaly_type)
         self._record_forensics(anomaly, self.current_level)
         self._save_state()
@@ -440,20 +483,7 @@ class PolicyEngine:
         docker_containers = self.policy_cfg.get('docker_containers', [])
 
         if level == 1:
-            logger.warning(f"[ACTION] [Level 1] Process Kill: Identifying high-resource PIDs in LXC {self.vmid}")
-            try:
-                cmd = "ps -eo pid,ppid,%cpu,%mem,comm --sort=-%cpu | head -n 2 | tail -n 1 | awk '{print $1}'"
-                proxmox.nodes(self.node).lxc(self.vmid).exec.post(command=f"bash -c \"kill -9 $({cmd})\"")
-                logger.info(f"[ACTION] Process kill triggered for high-resource PID in LXC {self.vmid}")
-                self.last_action_timestamp = time.time()
-                self.STABILIZATION_WINDOW = 90
-                return "process_kill_success"
-            except Exception as e:
-                logger.error(f"Process kill failed in LXC {self.vmid}: {e}")
-                return "process_kill_failed"
-            
-        elif level == 2:
-            logger.warning(f"[ACTION] [Level 2] Attempting Recovery for Service: {service_name} (Retry {self.retries + 1}/{self.max_retries + 1})")
+            logger.warning(f"[ACTION] [Level 1] Attempting Service Restart: {service_name} (Retry {self.retries}/{self.max_retries_per_level[1]})")
             
             if service_name in docker_containers:
                 if self._verified_docker_restart(service_name):
@@ -462,8 +492,8 @@ class PolicyEngine:
                     return "docker_restart_success"
                 return "docker_restart_verification_failed"
             
-            logger.info(f"[ACTION] {service_name} identified as LXC daemon. Using Proxmox pct exec.")
             try:
+                # Remote SSH / Proxmox execution to restart the service gently
                 proxmox.nodes(self.node).lxc(self.vmid).exec.post(command=f"systemctl restart {service_name}")
                 time.sleep(5)
                 if self._verify_service(service_name, docker_containers):
@@ -472,8 +502,23 @@ class PolicyEngine:
                     return "pct_exec_restart_success"
                 return "pct_exec_verification_failed"
             except Exception as e:
-                logger.error(f"Proxmox pct exec failed for {service_name}: {e}")
+                logger.error(f"Level 1 Service Restart failed for {service_name}: {e}")
                 return "pct_exec_restart_failed"
+            
+        elif level == 2:
+            logger.warning(f"[ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC {self.vmid} (Retry {self.retries}/{self.max_retries_per_level[2]})")
+            try:
+                # Aggressive bash command to find and kill the highest CPU consumer
+                cmd = "ps -eo pid,ppid,%cpu,%mem,comm --sort=-%cpu | head -n 2 | tail -n 1 | awk '{print $1}'"
+                proxmox.nodes(self.node).lxc(self.vmid).exec.post(command=f"bash -c \"kill -9 $({cmd})\"")
+                
+                logger.info(f"[ACTION] Level 2 Process Kill executed successfully.")
+                self.last_action_timestamp = time.time()
+                self.STABILIZATION_WINDOW = 90
+                return "process_kill_success"
+            except Exception as e:
+                logger.error(f"Level 2 Process kill failed in LXC {self.vmid}: {e}")
+                return "process_kill_failed"
             
         elif level == 3:
             logger.warning(f"[ACTION] [Level 3] Traffic Rerouting triggered for {anomaly_type} anomaly")
