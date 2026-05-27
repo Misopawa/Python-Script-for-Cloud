@@ -25,7 +25,7 @@ def main():
     engine = ThresholdEngine()
     healer = PolicyEngine(config=config)
 
-    print("🚀 AI-Powered Monitoring Started. 48-Hour Calibration Active.")
+    print("🚀 AI-Powered Monitoring Started.")
 
     try:
         while True:
