@@ -315,18 +315,13 @@ class PolicyEngine:
             return f"[ WARNING ] {label} [Cycle {worst_count}/{self.required_consecutive_head_anomalies}]"
 
         triggered_metric = worst_head or (culprits[0] if culprits else "UNKNOWN")
-        head_info = (heads.get(triggered_metric) or {}) if isinstance(heads, dict) else {}
-        value_pct = head_info.get("value", None)
-        threshold_pct = head_info.get("threshold", None)
-        study_active = bool(head_info.get("study_active", False))
+        features = anomaly.get("features", {})
         try:
-            value_pct = float(value_pct)
+            value_pct = float(features.get(triggered_metric, 0.0))
         except Exception:
             value_pct = 0.0
-        try:
-            threshold_pct = float(threshold_pct)
-        except Exception:
-            threshold_pct = 70.0
+        threshold_pct = 70.0  # Dynamic thresholds are now handled natively by the AI model
+        study_active = False
 
         # Determine Anomaly Type for Routing
         mapping = {"CPU": "cpu", "MEMORY": "memory", "STORAGE": "storage", "NETWORK": "network"}

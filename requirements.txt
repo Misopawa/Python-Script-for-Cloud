@@ -6,3 +6,4 @@ scikit-learn
 joblib
 proxmoxer
 requests
+urllib3
