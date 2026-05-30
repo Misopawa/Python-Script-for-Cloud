@@ -4,6 +4,7 @@ import os
 import subprocess
 import csv
 from datetime import datetime
+import requests
 from utils.logger import get_logger
 from monitoring.metrics_collector import get_proxmox_client
 
@@ -468,6 +469,27 @@ class PolicyEngine:
             logger.error(f"[ACTION] Verified restart process failed for {service_name}: {e}")
             return False
 
+    def _send_telegram_alert(self, message):
+        telegram_cfg = self.config.get('telegram', {})
+        bot_token = telegram_cfg.get('bot_token')
+        chat_id = telegram_cfg.get('chat_id')
+        if not bot_token or not chat_id:
+            logger.warning("[TELEGRAM] Missing telegram configuration; skipping alert.")
+            return
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            'chat_id': chat_id,
+            'text': message,
+            'parse_mode': 'HTML'
+        }
+        try:
+            response = requests.post(url, data=payload, timeout=10)
+            if not response.ok:
+                logger.warning(f"[TELEGRAM] Failed to send alert: status={response.status_code} text={response.text}")
+        except Exception as e:
+            logger.warning(f"[TELEGRAM] Exception while sending alert: {e}")
+            pass
+
     def _trigger_level_action(self, level, anomaly_type):
         """
         Implementation of the 5-Tier Escalation Hierarchy (Table 3.5).
@@ -479,12 +501,15 @@ class PolicyEngine:
 
         if level == 1:
             logger.warning(f"[ACTION] [Level 1] Attempting Service Restart: {service_name} (Retry {self.retries}/{self.max_retries_per_level[1]})")
+            self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 1 remediation for LXC {self.vmid}.")
 
             if service_name in docker_containers:
                 if self._verified_docker_restart(service_name):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
+                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
                     return "docker_restart_success"
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "docker_restart_verification_failed"
 
             # Native host-level exec using /usr/sbin/pct
@@ -496,19 +521,25 @@ class PolicyEngine:
                 if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
+                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
                     return "pct_exec_restart_success"
                 if proc.returncode == 0:
+                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                     return "pct_exec_verification_failed"
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "pct_exec_restart_failed"
             except subprocess.TimeoutExpired:
                 logger.error(f"Level 1 Service Restart timed out for {service_name}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "pct_exec_timeout"
             except Exception as e:
                 logger.error(f"Level 1 Service Restart failed for {service_name}: {e}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "pct_exec_restart_failed"
 
         elif level == 2:
             logger.warning(f"[ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC {self.vmid} (Retry {self.retries}/{self.max_retries_per_level[2]})")
+            self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 2 remediation for LXC {self.vmid}.")
             try:
                 # Use pct exec to pkill the resource-hogging process inside the container
                 cmd = ["/usr/sbin/pct", "exec", str(self.vmid), "--", "pkill", "-9", "stress-ng"]
@@ -520,50 +551,64 @@ class PolicyEngine:
                     time.sleep(15)
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
+                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 2 successful. System stabilized.")
                     return "process_kill_success"
                 else:
                     logger.error(f"Level 2 Process kill returned non-zero rc: {proc.returncode}")
+                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 2 failed. Escalating to next tier.")
                     return "process_kill_failed"
             except subprocess.TimeoutExpired:
                 logger.error(f"Level 2 Process kill timed out for LXC {self.vmid}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 2 failed. Escalating to next tier.")
                 return "process_kill_timeout"
             except Exception as e:
                 logger.error(f"Level 2 Process kill failed in LXC {self.vmid}: {e}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 2 failed. Escalating to next tier.")
                 return "process_kill_failed"
 
         elif level == 3:
             logger.warning(f"[ACTION] [Level 3] Traffic Rerouting triggered for {anomaly_type} anomaly")
+            self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 3 remediation for LXC {self.vmid}.")
             logger.info("[SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...")
             self.last_action_timestamp = time.time()
             self.STABILIZATION_WINDOW = 90
+            self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 3 successful. System stabilized.")
             return "traffic_reroute_simulated"
 
         elif level == 4:
             logger.warning(f"[ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID {self.vmid})")
+            self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 4 remediation for LXC {self.vmid}.")
             try:
                 # Soft reboot via pct
                 cmd = ["/usr/sbin/pct", "reboot", str(self.vmid)]
                 proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=20)
                 logger.info(f"[ACTION] pct reboot returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
-                time.sleep(10)
+                # Wait for OS boot after soft reboot
+                time.sleep(45)
                 if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
                     # OS boot logic: 4. Intelligence for Level 4 (Reboot) - Extended 120s window
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 120
                     logger.info("[ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.")
+                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 4 successful. System stabilized.")
                     return "lxc_soft_reboot"
                 if proc.returncode == 0:
+                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
                     return "lxc_reboot_verification_failed"
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
                 return "lxc_soft_reboot_failed"
             except subprocess.TimeoutExpired:
                 logger.error(f"Proxmox soft reboot timed out for LXC {self.vmid}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
                 return "lxc_reboot_timeout"
             except Exception as e:
                 logger.error(f"Proxmox soft reboot failed for LXC {self.vmid}: {e}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
                 return "lxc_soft_reboot_failed"
 
         elif level == 5:
             logger.critical(f"[ACTION] [Level 5] CRITICAL: Container hard reboot (VMID {self.vmid})")
+            self._send_telegram_alert(f"🚨 <b>[CRITICAL ESCALATION]</b> Level 5 Hard Reboot triggered for LXC {self.vmid}. Automated recovery limits reached. <b>HUMAN INTERVENTION REQUIRED IMMEDIATELY.</b>")
             try:
                 # Hard reboot via pct: stop then start
                 cmd_stop = ["/usr/sbin/pct", "stop", str(self.vmid)]
@@ -573,19 +618,24 @@ class PolicyEngine:
                 cmd_start = ["/usr/sbin/pct", "start", str(self.vmid)]
                 proc_start = subprocess.run(cmd_start, capture_output=True, text=True, check=False, timeout=20)
                 logger.info(f"[ACTION] pct start returned rc={proc_start.returncode}; stdout={proc_start.stdout.strip()}; stderr={proc_start.stderr.strip()}")
-                time.sleep(10)
+                time.sleep(45)
                 if proc_stop.returncode == 0 and proc_start.returncode == 0 and self._verify_service(service_name, docker_containers):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 180
+                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 5 successful. System stabilized.")
                     return "lxc_hard_reboot"
                 if proc_stop.returncode == 0 and proc_start.returncode == 0:
+                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 5 failed. Escalating to next tier.")
                     return "lxc_hard_reboot_verification_failed"
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 5 failed. Escalating to next tier.")
                 return "lxc_hard_reboot_failed"
             except subprocess.TimeoutExpired:
                 logger.error(f"Proxmox hard reboot timed out for LXC {self.vmid}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 5 failed. Escalating to next tier.")
                 return "lxc_hard_reboot_timeout"
             except Exception as e:
                 logger.error(f"Proxmox hard reboot failed for LXC {self.vmid}: {e}")
+                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 5 failed. Escalating to next tier.")
                 return "lxc_hard_reboot_failed"
 
         return "unknown_action"
