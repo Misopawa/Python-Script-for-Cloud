@@ -425,6 +425,43 @@ class PolicyEngine:
                 logger.error(f"[VERIFICATION] Failed to check LXC status via Proxmox: {e}")
                 return False
 
+    def _verify_service_with_backoff(self, service_name, docker_containers, max_wait_sec=120):
+        """Verify service with exponential backoff retries."""
+        start_time = time.time()
+        attempt = 0
+        
+        while time.time() - start_time < max_wait_sec:
+            attempt += 1
+            
+            if service_name in docker_containers:
+                try:
+                    result = subprocess.run(
+                        ["docker", "inspect", "-f", "{{.State.Running}}", service_name],
+                        capture_output=True, text=True, check=True, timeout=5
+                    )
+                    if result.stdout.strip().lower() == "true":
+                        logger.info(f"[VERIFY] Service {service_name} confirmed running (attempt {attempt})")
+                        return True
+                except Exception:
+                    pass
+            else:
+                try:
+                    proxmox = get_proxmox_client(self.config)
+                    status = proxmox.nodes(self.node).lxc(self.vmid).status.current.get()
+                    if status.get('status') == 'running':
+                        logger.info(f"[VERIFY] LXC {self.vmid} confirmed running (attempt {attempt})")
+                        return True
+                except Exception:
+                    pass
+            
+            wait_time = min(2 ** (attempt - 1), 16)
+            if attempt <= 5:
+                logger.info(f"[VERIFY] Service not ready yet, retry {attempt} in {wait_time}s...")
+            time.sleep(wait_time)
+        
+        logger.error(f"[VERIFY] Service verification failed after {max_wait_sec}s, {attempt} attempts")
+        return False
+
     def _verified_docker_restart(self, service_name):
         """
         Verified Restart function: ensures the service actually restarts and stays running.
@@ -518,7 +555,7 @@ class PolicyEngine:
                 proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=15)
                 logger.info(f"[ACTION] pct exec returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
                 time.sleep(5)
-                if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
+                if proc.returncode == 0 and self._verify_service_with_backoff(service_name, docker_containers, max_wait_sec=60):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
                     self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
@@ -585,7 +622,7 @@ class PolicyEngine:
                 logger.info(f"[ACTION] pct reboot returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
                 # Wait for OS boot after soft reboot
                 time.sleep(45)
-                if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
+                if proc.returncode == 0 and self._verify_service_with_backoff(service_name, docker_containers, max_wait_sec=120):
                     # OS boot logic: 4. Intelligence for Level 4 (Reboot) - Extended 120s window
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 120
@@ -619,7 +656,7 @@ class PolicyEngine:
                 proc_start = subprocess.run(cmd_start, capture_output=True, text=True, check=False, timeout=20)
                 logger.info(f"[ACTION] pct start returned rc={proc_start.returncode}; stdout={proc_start.stdout.strip()}; stderr={proc_start.stderr.strip()}")
                 time.sleep(45)
-                if proc_stop.returncode == 0 and proc_start.returncode == 0 and self._verify_service(service_name, docker_containers):
+                if proc_stop.returncode == 0 and proc_start.returncode == 0 and self._verify_service_with_backoff(service_name, docker_containers, max_wait_sec=180):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 180
                     self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 5 successful. System stabilized.")
