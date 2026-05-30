@@ -472,93 +472,120 @@ class PolicyEngine:
         """
         Implementation of the 5-Tier Escalation Hierarchy (Table 3.5).
         """
-        proxmox = get_proxmox_client(self.config)
+        # Use native host-level pct commands instead of Proxmox API to avoid hangs
         service_name = self.mon_cfg.get('service_name', 'unknown-service')
         mon_infra = self.policy_cfg.get('monitoring_infrastructure', [])
         docker_containers = self.policy_cfg.get('docker_containers', [])
 
         if level == 1:
             logger.warning(f"[ACTION] [Level 1] Attempting Service Restart: {service_name} (Retry {self.retries}/{self.max_retries_per_level[1]})")
-            
+
             if service_name in docker_containers:
                 if self._verified_docker_restart(service_name):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
                     return "docker_restart_success"
                 return "docker_restart_verification_failed"
-            
+
+            # Native host-level exec using /usr/sbin/pct
             try:
-                # Remote SSH / Proxmox execution to restart the service gently
-                proxmox.nodes(self.node).lxc(self.vmid).exec.post(command=f"systemctl restart {service_name}")
+                cmd = ["/usr/sbin/pct", "exec", str(self.vmid), "--", "systemctl", "restart", service_name]
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=15)
+                logger.info(f"[ACTION] pct exec returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
                 time.sleep(5)
-                if self._verify_service(service_name, docker_containers):
+                if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 90
                     return "pct_exec_restart_success"
-                return "pct_exec_verification_failed"
+                if proc.returncode == 0:
+                    return "pct_exec_verification_failed"
+                return "pct_exec_restart_failed"
+            except subprocess.TimeoutExpired:
+                logger.error(f"Level 1 Service Restart timed out for {service_name}")
+                return "pct_exec_timeout"
             except Exception as e:
                 logger.error(f"Level 1 Service Restart failed for {service_name}: {e}")
                 return "pct_exec_restart_failed"
-            
+
         elif level == 2:
             logger.warning(f"[ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC {self.vmid} (Retry {self.retries}/{self.max_retries_per_level[2]})")
             try:
-                # Aggressive bash command to find and kill the highest CPU consumer
-                cmd = "ps -eo pid,ppid,%cpu,%mem,comm --sort=-%cpu | head -n 2 | tail -n 1 | awk '{print $1}'"
-                proxmox.nodes(self.node).lxc(self.vmid).exec.post(command=f"bash -c \"kill -9 $({cmd})\"")
-                
-                logger.info(f"[ACTION] Level 2 Process Kill executed successfully.")
-                self.last_action_timestamp = time.time()
-                self.STABILIZATION_WINDOW = 90
-                return "process_kill_success"
+                # Use pct exec to pkill the resource-hogging process inside the container
+                cmd = ["/usr/sbin/pct", "exec", str(self.vmid), "--", "pkill", "-9", "stress-ng"]
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=15)
+                logger.info(f"[ACTION] pct exec pkill returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
+                if proc.returncode == 0:
+                    # Allow Prometheus time to scrape new metrics (0% CPU)
+                    logger.info("[ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.")
+                    time.sleep(15)
+                    self.last_action_timestamp = time.time()
+                    self.STABILIZATION_WINDOW = 90
+                    return "process_kill_success"
+                else:
+                    logger.error(f"Level 2 Process kill returned non-zero rc: {proc.returncode}")
+                    return "process_kill_failed"
+            except subprocess.TimeoutExpired:
+                logger.error(f"Level 2 Process kill timed out for LXC {self.vmid}")
+                return "process_kill_timeout"
             except Exception as e:
                 logger.error(f"Level 2 Process kill failed in LXC {self.vmid}: {e}")
                 return "process_kill_failed"
-            
+
         elif level == 3:
             logger.warning(f"[ACTION] [Level 3] Traffic Rerouting triggered for {anomaly_type} anomaly")
             logger.info("[SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...")
             self.last_action_timestamp = time.time()
             self.STABILIZATION_WINDOW = 90
             return "traffic_reroute_simulated"
-            
+
         elif level == 4:
             logger.warning(f"[ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID {self.vmid})")
             try:
-                # Trigger a soft reboot via Proxmox API
-                proxmox.nodes(self.node).lxc(self.vmid).status.reboot.post()
-                logger.info(f"[ACTION] Soft reboot initiated for LXC {self.vmid}")
-                
-                # 2. Verification (Wait for container to at least start rebooting/accessible)
+                # Soft reboot via pct
+                cmd = ["/usr/sbin/pct", "reboot", str(self.vmid)]
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=20)
+                logger.info(f"[ACTION] pct reboot returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
                 time.sleep(10)
-                if self._verify_service(service_name, docker_containers):
+                if proc.returncode == 0 and self._verify_service(service_name, docker_containers):
                     # OS boot logic: 4. Intelligence for Level 4 (Reboot) - Extended 120s window
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 120
                     logger.info("[ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.")
                     return "lxc_soft_reboot"
-                else:
+                if proc.returncode == 0:
                     return "lxc_reboot_verification_failed"
+                return "lxc_soft_reboot_failed"
+            except subprocess.TimeoutExpired:
+                logger.error(f"Proxmox soft reboot timed out for LXC {self.vmid}")
+                return "lxc_reboot_timeout"
             except Exception as e:
                 logger.error(f"Proxmox soft reboot failed for LXC {self.vmid}: {e}")
                 return "lxc_soft_reboot_failed"
-            
+
         elif level == 5:
             logger.critical(f"[ACTION] [Level 5] CRITICAL: Container hard reboot (VMID {self.vmid})")
             try:
-                proxmox.nodes(self.node).lxc(self.vmid).status.stop.post()
+                # Hard reboot via pct: stop then start
+                cmd_stop = ["/usr/sbin/pct", "stop", str(self.vmid)]
+                proc_stop = subprocess.run(cmd_stop, capture_output=True, text=True, check=False, timeout=20)
+                logger.info(f"[ACTION] pct stop returned rc={proc_stop.returncode}; stdout={proc_stop.stdout.strip()}; stderr={proc_stop.stderr.strip()}")
                 time.sleep(5)
-                proxmox.nodes(self.node).lxc(self.vmid).status.start.post()
+                cmd_start = ["/usr/sbin/pct", "start", str(self.vmid)]
+                proc_start = subprocess.run(cmd_start, capture_output=True, text=True, check=False, timeout=20)
+                logger.info(f"[ACTION] pct start returned rc={proc_start.returncode}; stdout={proc_start.stdout.strip()}; stderr={proc_start.stderr.strip()}")
                 time.sleep(10)
-                if self._verify_service(service_name, docker_containers):
+                if proc_stop.returncode == 0 and proc_start.returncode == 0 and self._verify_service(service_name, docker_containers):
                     self.last_action_timestamp = time.time()
                     self.STABILIZATION_WINDOW = 180
                     return "lxc_hard_reboot"
-                return "lxc_hard_reboot_verification_failed"
+                if proc_stop.returncode == 0 and proc_start.returncode == 0:
+                    return "lxc_hard_reboot_verification_failed"
+                return "lxc_hard_reboot_failed"
+            except subprocess.TimeoutExpired:
+                logger.error(f"Proxmox hard reboot timed out for LXC {self.vmid}")
+                return "lxc_hard_reboot_timeout"
             except Exception as e:
                 logger.error(f"Proxmox hard reboot failed for LXC {self.vmid}: {e}")
                 return "lxc_hard_reboot_failed"
-            
-        return "unknown_action"
-            
+
         return "unknown_action"
