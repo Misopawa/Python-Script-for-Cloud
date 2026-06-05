@@ -453,3 +453,20 @@ class HealingDashboard:
         else:
             content.append("[ TELEGRAM: INACTIVE ]", style="dim")
         return Panel(Align.center(content), border_style="dim")
+
+if __name__ == "__main__":
+    # 1. Create a basic dummy configuration so the dashboard doesn't crash
+    dummy_config = {"proxmox": {"node": "local-node", "vmid": "100"}}
+    
+    # 2. Initialize the dashboard blueprint
+    dashboard = HealingDashboard(config=dummy_config)
+    
+    # 3. Launch the visual interface and keep it open
+    with Live(dashboard.generate_layout(), refresh_per_second=4, screen=True) as live:
+        try:
+            while True:
+                # Keep the screen alive and running
+                time.sleep(1)
+        except KeyboardInterrupt:
+            # Allow the user to close it gracefully with Ctrl+C
+            pass

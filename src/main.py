@@ -141,34 +141,40 @@ def main_tui():
                         last_action_time = time.time()
 
                 # Build decision heads for TUI display
+                cpu_value = float(state.get("CPU", 0.0))
+                memory_value = float(state.get("MEMORY", 0.0))
+                storage_value = float(state.get("STORAGE", 0.0))
+                network_value = float(state.get("NETWORK", 0.0))
+                anomaly_detected = culprit is not None
+
                 decision_heads = {
                     "CPU": {
-                        "value": state.get("CPU", 0),
-                        "baseline": 50,
-                        "deviation": abs(state.get("CPU", 0) - 50),
-                        "threshold": engine.active_thresholds.get("CPU", 70.0),
-                        "anomaly": state.get("CPU", 0) > engine.active_thresholds.get("CPU", 70.0),
+                        "value": cpu_value,
+                        "baseline": cpu_value,
+                        "deviation": 0.0,
+                        "threshold": engine.active_thresholds.get("CPU", 75.0),
+                        "anomaly": anomaly_detected,
                     },
                     "MEMORY": {
-                        "value": state.get("MEMORY", 0),
-                        "baseline": 50,
-                        "deviation": abs(state.get("MEMORY", 0) - 50),
-                        "threshold": engine.active_thresholds.get("MEMORY", 70.0),
-                        "anomaly": state.get("MEMORY", 0) > engine.active_thresholds.get("MEMORY", 70.0),
+                        "value": memory_value,
+                        "baseline": memory_value,
+                        "deviation": 0.0,
+                        "threshold": engine.active_thresholds.get("MEMORY", 75.0),
+                        "anomaly": anomaly_detected,
                     },
                     "STORAGE": {
-                        "value": state.get("STORAGE", 0),
-                        "baseline": 50,
-                        "deviation": abs(state.get("STORAGE", 0) - 50),
-                        "threshold": engine.active_thresholds.get("STORAGE", 70.0),
-                        "anomaly": state.get("STORAGE", 0) > engine.active_thresholds.get("STORAGE", 70.0),
+                        "value": storage_value,
+                        "baseline": storage_value,
+                        "deviation": 0.0,
+                        "threshold": engine.active_thresholds.get("STORAGE", 75.0),
+                        "anomaly": anomaly_detected,
                     },
                     "NETWORK": {
-                        "value": state.get("NETWORK", 0),
-                        "baseline": 50,
-                        "deviation": abs(state.get("NETWORK", 0) - 50),
-                        "threshold": engine.active_thresholds.get("NETWORK", 70.0),
-                        "anomaly": state.get("NETWORK", 0) > engine.active_thresholds.get("NETWORK", 70.0),
+                        "value": network_value,
+                        "baseline": network_value,
+                        "deviation": 0.0,
+                        "threshold": engine.active_thresholds.get("NETWORK", 75.0),
+                        "anomaly": anomaly_detected,
                         "latency_ms": 0.0,
                         "retrans_per_sec": 0.0,
                         "speed_mbps": 0.0,
