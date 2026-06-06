@@ -1,72 +1,121 @@
-import time
-import datetime
+"""Monitoring pipeline: Data Acquisition -> AI Inference -> Remediation Trigger."""
+
 import argparse
-import sys
+import datetime
+import time
 
 from data.collector import DataCollector
-from logic.detector import ThresholdEngine
 from healing.auto_healer import PolicyEngine
-from ui.dashboard_tui import HealingDashboard
+from logic.detector import AnomalyDetector, InferenceResult
 from rich.live import Live
+from ui.dashboard_tui import HealingDashboard
 
 
-def main_console():
-    """Original console output mode (for backward compatibility)"""
-    config = {
-        "monitoring": {
-            "demo_mode": True,
-            "service_name": "nginx"
-        },
-        "proxmox": {
-            "vmid": 100,
-            "node": "pve"
-        },
-        "policies": {
-            "docker_containers": []
-        }
+DEFAULT_CONFIG = {
+    "monitoring": {
+        "demo_mode": True,
+        "service_name": "nginx",
+    },
+    "proxmox": {
+        "host": "127.0.0.1",
+        "node": "pve",
+        "vmid": 101,
+        "user": "root@pam",
+        "password": "",
+        "verify_ssl": False,
+    },
+    "policies": {
+        "docker_containers": [],
+    },
+}
+
+
+def _build_anomaly_payload(result: InferenceResult) -> dict:
+    return {
+        "anomaly": True,
+        "ai_prediction": result.ai_prediction,
+        "culprits": [result.culprit] if result.culprit else [],
+        "score": result.anomaly_score,
+        "confidence": result.confidence,
+        "features": result.features,
     }
 
+
+def _build_decision_heads(result: InferenceResult | None) -> dict:
+    """Shape metric rows for the TUI from a single AI inference result."""
+    features = (result.features if result else {}) or {}
+    is_anomaly = bool(result and result.is_anomaly)
+    confidence = float(result.confidence if result else 0.0)
+    ai_score = float(result.anomaly_score if result else 0.0)
+
+    heads = {}
+    for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
+        heads[name] = {
+            "value": float(features.get(name, 0.0) or 0.0),
+            "anomaly": is_anomaly,
+            "confidence": confidence,
+            "ai_score": ai_score,
+            "ai_prediction": int(result.ai_prediction if result else 0),
+        }
+    return heads
+
+
+def run_cycle(
+    collector: DataCollector,
+    detector: AnomalyDetector,
+    healer: PolicyEngine,
+) -> tuple[dict, InferenceResult | None, str | None]:
+    """
+    Execute one monitoring cycle.
+
+    1. Data Acquisition — pull live metrics from Prometheus.
+    2. AI Inference — Isolation Forest classifies is_anomaly.
+    3. Remediation Trigger — call execute_remediation() on confident anomalies.
+    """
+    metrics = collector.get_live_state()
+    result = detector.infer(metrics)
+
+    action_message = None
+    if detector.should_remediate(result):
+        action_message = healer.execute_remediation(_build_anomaly_payload(result))
+        if action_message:
+            action_message = str(action_message).upper()
+    elif result is not None and not result.is_anomaly:
+        # Heartbeat: a clean inference resets the healer's escalation state.
+        healer.execute_remediation({"anomaly": False})
+
+    return metrics, result, action_message
+
+
+def main_console() -> None:
     collector = DataCollector()
-    engine = ThresholdEngine()
-    healer = PolicyEngine(config=config)
+    detector = AnomalyDetector()
+    healer = PolicyEngine(config=dict(DEFAULT_CONFIG))
 
     print("🚀 AI-Powered Monitoring Started (CONSOLE MODE).")
+    print(f"   Confidence gate: >= {detector.min_confidence:.0%}")
 
     try:
         while True:
             timestamp = datetime.datetime.now().isoformat()
+            metrics, result, action_message = run_cycle(collector, detector, healer)
 
-            state = collector.get_live_state()
-
-            engine.record_data_point(state)
-            engine.update_thresholds()
-
-            culprit = engine.evaluate_state(state)
-
-            action_message = None
-            if culprit is not None:
-                anomaly_data = {
-                    "anomaly": True,
-                    "culprits": [culprit],
-                    "score": 0.85,
-                    "features": state
-                }
-
-                action_message = healer.execute_remediation(anomaly_data)
-
-                if action_message:
-                    action_message = str(action_message).upper()
-
-            threshold_info = ", ".join(
-                f"{metric}={engine.active_thresholds.get(metric, 0.0):.1f}%"
-                for metric in ["CPU", "MEMORY", "STORAGE", "NETWORK"]
-            )
             metric_info = ", ".join(
-                f"{metric}={float(state.get(metric, 0.0)):.1f}%"
-                for metric in ["CPU", "MEMORY", "STORAGE", "NETWORK"]
+                f"{name}={float(metrics.get(name, 0.0)):.1f}%"
+                for name in ("CPU", "MEMORY", "STORAGE", "NETWORK")
             )
 
-            print(f"[{timestamp}] METRICS: {metric_info} | THRESHOLDS: {threshold_info}")
+            if result is None:
+                ai_status = "MODEL_UNAVAILABLE"
+            elif result.is_anomaly:
+                ai_status = (
+                    f"ANOMALY (pred=1, confidence={result.confidence:.0%}, "
+                    f"score={result.anomaly_score:.4f})"
+                )
+            else:
+                ai_status = f"NORMAL (pred=0, score={result.anomaly_score:.4f})"
+
+            print(f"[{timestamp}] METRICS: {metric_info} | AI: {ai_status}")
             if action_message:
                 print(f"[{timestamp}] ACTION: {action_message}")
 
@@ -75,28 +124,10 @@ def main_console():
         print("\nShutdown requested by user. Cleaning up...")
 
 
-def main_tui():
-    """TUI (Terminal User Interface) mode with rich dashboard"""
-    config = {
-        "monitoring": {
-            "demo_mode": True,
-            "service_name": "nginx"
-        },
-        "proxmox": {
-            "host": "127.0.0.1",
-            "node": "pve",
-            "vmid": 101,
-            "user": "root@pam",
-            "password": "",
-            "verify_ssl": False
-        },
-        "policies": {
-            "docker_containers": []
-        }
-    }
-
+def main_tui() -> None:
+    config = dict(DEFAULT_CONFIG)
     collector = DataCollector()
-    engine = ThresholdEngine()
+    detector = AnomalyDetector()
     healer = PolicyEngine(config=config)
     dashboard = HealingDashboard(config, collector=collector)
 
@@ -107,133 +138,72 @@ def main_tui():
     try:
         cycle_count = 0
         last_action_time = time.time()
-        
-        with Live(dashboard.generate_layout(), console=dashboard.console, refresh_per_second=2, screen=True) as live:
+
+        with Live(
+            dashboard.generate_layout(),
+            console=dashboard.console,
+            refresh_per_second=2,
+            screen=True,
+        ) as live:
             while True:
                 cycle_count += 1
                 timestamp = datetime.datetime.now().isoformat()
 
-                # Collect metrics
-                state = collector.get_live_state()
-                
-                # Process through detection engine
-                engine.record_data_point(state)
-                engine.update_thresholds()
+                metrics, result, action_message = run_cycle(collector, detector, healer)
 
-                # Check for anomalies
-                culprit = engine.evaluate_state(state)
-                action_message = None
-                escalation_level = 0
-                
-                if culprit is not None:
-                    anomaly_data = {
-                        "anomaly": True,
-                        "culprits": [culprit],
-                        "score": 0.85,
-                        "features": state
-                    }
+                escalation_level = 1 if action_message and action_message not in ("NONE", "STABILIZATION_SKIP") else 0
+                if escalation_level:
+                    last_action_time = time.time()
 
-                    action_message = healer.execute_remediation(anomaly_data)
+                decision_heads = _build_decision_heads(result)
+                culprits = [result.culprit] if result and result.culprit else []
 
-                    if action_message:
-                        action_message = str(action_message).upper()
-                        escalation_level = 1
-                        last_action_time = time.time()
-
-                # Build decision heads for TUI display
-                cpu_value = float(state.get("CPU", 0.0))
-                memory_value = float(state.get("MEMORY", 0.0))
-                storage_value = float(state.get("STORAGE", 0.0))
-                network_value = float(state.get("NETWORK", 0.0))
-                anomaly_detected = culprit is not None
-
-                decision_heads = {
-                    "CPU": {
-                        "value": cpu_value,
-                        "baseline": cpu_value,
-                        "deviation": 0.0,
-                        "threshold": engine.active_thresholds.get("CPU", 75.0),
-                        "anomaly": anomaly_detected,
-                    },
-                    "MEMORY": {
-                        "value": memory_value,
-                        "baseline": memory_value,
-                        "deviation": 0.0,
-                        "threshold": engine.active_thresholds.get("MEMORY", 75.0),
-                        "anomaly": anomaly_detected,
-                    },
-                    "STORAGE": {
-                        "value": storage_value,
-                        "baseline": storage_value,
-                        "deviation": 0.0,
-                        "threshold": engine.active_thresholds.get("STORAGE", 75.0),
-                        "anomaly": anomaly_detected,
-                    },
-                    "NETWORK": {
-                        "value": network_value,
-                        "baseline": network_value,
-                        "deviation": 0.0,
-                        "threshold": engine.active_thresholds.get("NETWORK", 75.0),
-                        "anomaly": anomaly_detected,
-                        "latency_ms": 0.0,
-                        "retrans_per_sec": 0.0,
-                        "speed_mbps": 0.0,
-                    }
-                }
-
-                # Update dashboard
                 dashboard.update_view(
-                    metrics=state,
-                    anomaly_score=0.85 if culprit else 0.0,
-                    threshold=engine.active_thresholds.get("CPU", 70.0),
+                    metrics=metrics,
+                    anomaly_score=float(result.confidence if result and result.is_anomaly else 0.0),
                     escalation_level=escalation_level,
                     action_name=str(action_message or "MONITORING"),
                     stabilization_window=10,
                     last_action_timestamp=last_action_time,
                     is_connected=True,
                     cycle_count=cycle_count,
-                    culprits=[culprit] if culprit else [],
+                    culprits=culprits,
                     decision_heads=decision_heads,
-                    ui_messages=[f"[{timestamp}] {msg}" for msg in [
-                        "Metrics collected",
-                        f"CPU: {state.get('CPU', 0):.1f}%",
-                        f"MEMORY: {state.get('MEMORY', 0):.1f}%",
-                        f"STORAGE: {state.get('STORAGE', 0):.1f}%",
-                        f"NETWORK: {state.get('NETWORK', 0):.1f}%",
-                    ]]
+                    raw_score=float(result.anomaly_score if result else 0.0),
+                    ui_messages=[
+                        f"[{timestamp}] Metrics collected",
+                        f"[{timestamp}] AI prediction: {result.ai_prediction if result else 'N/A'}",
+                        f"[{timestamp}] Confidence: {result.confidence:.0%}" if result else f"[{timestamp}] Confidence: N/A",
+                    ],
                 )
 
                 live.update(dashboard.generate_layout())
                 time.sleep(2)
-
     except KeyboardInterrupt:
         print("\n✓ Shutdown requested by user. Cleaning up...")
         dashboard.disable_key_listener()
 
 
-def main():
-    """Main entry point with argument parser"""
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="AI-Powered Cloud Monitoring & Auto-Healing System"
+        description="AI-Powered Cloud Monitoring & Auto-Healing System",
     )
     parser.add_argument(
         "--tui",
         action="store_true",
-        help="Run with Terminal User Interface (TUI) dashboard"
+        help="Run with Terminal User Interface (TUI) dashboard",
     )
     parser.add_argument(
         "--console",
         action="store_true",
         default=True,
-        help="Run with console output (default)"
+        help="Run with console output (default)",
     )
 
     args = parser.parse_args()
 
-    # If --tui is explicitly set, use TUI mode
     if args.tui:
         main_tui()
-    # Otherwise, use console mode (default)
     else:
         main_console()
 

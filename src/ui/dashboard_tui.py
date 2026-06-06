@@ -20,7 +20,6 @@ class HealingDashboard:
         # 1. Basic configuration
         self.config = config
         self.collector = collector
-        self.study_timer = 172800  # 48 hours in seconds
         
         # 2. Initialize ALL state variables BEFORE the UI starts
         # This prevents the "AttributeError" in your header/footer
@@ -35,9 +34,8 @@ class HealingDashboard:
         self.stg_label = None
         self.current_healing_level = 0
         self.current_level = 0
-        self.current_thresholds = {"CPU": 70.0, "MEMORY": 70.0, "STORAGE": 70.0, "NETWORK": 70.0}
-        self.culprits = []
-        self.next_calibration_in = None
+        self.ai_confidence = 0.0
+        self.ai_prediction = 0
         self.forensics_file = "anomalies_forensics.csv"
         self._stdin_fd = None
         self._stdin_old_settings = None
@@ -62,36 +60,25 @@ class HealingDashboard:
         storage_val = metrics.get('STORAGE', 0.0)
         network_val = metrics.get('NETWORK', 0.0)
 
-        suffix = "(I)" if self.study_timer > 0 else "(AI)"
         panel_text = Text.from_markup(
             f"[bold cyan]LIVE TELEMETRY[/bold cyan]\n"
             f"CPU Usage: {cpu_val:>5.2f}%\n"
             f"MEM Usage: {mem_val:>5.2f}%\n"
             f"Storage: {storage_val:>5.2f}%\n"
             f"Network: {network_val:>5.2f}%\n"
-            f"Calibration: {self.format_timer(self.study_timer)}\n"
+            f"AI Prediction: {self.ai_prediction}\n"
+            f"AI Confidence: {self.ai_confidence:.0%}\n"
             f"[bold yellow]Current Healing Level: {self.current_healing_level}[/bold yellow]"
         )
 
-        threshold_table = Table.grid(expand=True)
-        threshold_table.add_column("Component", style="cyan")
-        threshold_table.add_column("Threshold", justify="right", style="bold white")
-        for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
-            threshold_table.add_row(f"{name}", f"{self.current_thresholds.get(name, 70.0):.1f}%{suffix}")
-
         panel_body = Table.grid(expand=True)
         panel_body.add_row(panel_text)
-        panel_body.add_row(Text("Current Thresholds:", style="bold white"))
-        panel_body.add_row(threshold_table)
 
         self.ui_messages.append("[INFO] Scraped metrics from 127.0.0.1:9090")
 
         self.layout["ai_brain"].update(Panel(panel_body, title="AI Decision Logic", border_style="cyan"))
         self.layout["footer"].update(Panel(Align.center(Text("[ SOURCE: 127.0.0.1:9090 ]  [ STATUS: CONNECTED ]", style="bold cyan")), border_style="dim"))
         self.refresh_operations()
-
-        if self.study_timer > 0:
-            self.study_timer -= 5
 
     def format_timer(self, seconds: int) -> str:
         seconds = max(0, int(seconds))
@@ -167,7 +154,7 @@ class HealingDashboard:
     def generate_layout(self):
         return self.layout
 
-    def update_view(self, metrics, anomaly_score, threshold, escalation_level, action_name, stabilization_window, last_action_timestamp, is_connected=False, ui_messages=None, raw_score=None, decision_heads=None, cycle_count=None, culprits=None, next_calibration_in=None):
+    def update_view(self, metrics, anomaly_score, escalation_level, action_name, stabilization_window, last_action_timestamp, is_connected=False, ui_messages=None, raw_score=None, decision_heads=None, cycle_count=None, culprits=None, next_calibration_in=None):
         if ui_messages:
             self.ui_messages.extend(list(ui_messages))
         if cycle_count is not None:
@@ -182,23 +169,22 @@ class HealingDashboard:
             except Exception:
                 pass
         if decision_heads and isinstance(decision_heads, dict):
-            for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
-                self.current_thresholds[name] = float((decision_heads.get(name) or {}).get("threshold", self.current_thresholds.get(name, 70.0)))
-        elif threshold is not None:
-            for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
-                self.current_thresholds[name] = float(threshold)
+            sample = decision_heads.get("CPU") or {}
+            try:
+                self.ai_confidence = float(sample.get("confidence", self.ai_confidence))
+            except Exception:
+                pass
+            try:
+                self.ai_prediction = int(sample.get("ai_prediction", self.ai_prediction))
+            except Exception:
+                pass
         if culprits is not None:
             try:
                 self.culprits = list(culprits)
             except Exception:
                 self.culprits = []
-        if next_calibration_in is not None:
-            try:
-                self.next_calibration_in = int(next_calibration_in)
-            except Exception:
-                self.next_calibration_in = None
         self.layout["header"].update(self._make_header(True))
-        self.layout["ai_brain"].update(self._make_ai_brain_panel(decision_heads, escalation_level, action_name, stabilization_window, last_action_timestamp, self.culprits, self.next_calibration_in))
+        self.layout["ai_brain"].update(self._make_ai_brain_panel(decision_heads, escalation_level, action_name, stabilization_window, last_action_timestamp, self.culprits, raw_score))
         self.layout["forensics"].update(self._make_logs_panel())
         self.layout["right"].update(self._make_background_panel())
         self.layout["footer"].update(self._make_footer())
@@ -222,7 +208,7 @@ class HealingDashboard:
         header_content = title + status_text + info
         return Panel(Align.center(header_content), style="blue")
 
-    def _make_ai_brain_panel(self, decision_heads, level, action, window, last_action, culprits, next_calibration_in):
+    def _make_ai_brain_panel(self, decision_heads, level, action, window, last_action, culprits, raw_score=None):
         current_time = time.time()
         time_diff = current_time - last_action
         remaining = max(0, int(window - time_diff)) if last_action > 0 else 0
@@ -232,134 +218,65 @@ class HealingDashboard:
             return Panel(Align.center(content, vertical="middle"), title="System Status", border_style="bright_red")
 
         heads = decision_heads or {}
-        table = Table(title="Health Grid", expand=True, title_style="bold blue")
+        table = Table(title="Health Grid (Isolation Forest)", expand=True, title_style="bold blue")
         table.add_column("Component", style="cyan")
         table.add_column("Status")
         table.add_column("Current", justify="right")
-        table.add_column("Baseline", justify="right")
-        table.add_column("Deviation", justify="right")
-        table.add_column("Thresh", justify="right")
+        table.add_column("AI Score", justify="right")
+        table.add_column("Confidence", justify="right")
+
+        global_anomaly = any(bool((heads.get(name) or {}).get("anomaly", False)) for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"))
 
         if not heads:
             wait = Text("WAIT...", style="dim")
             na = Text("N/A", style="dim")
-            thresh = Text("70.0(I)", style="dim")
-            table.add_row(Text("[CPU]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na, thresh)
-            table.add_row(Text("[MEMORY]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na, thresh)
-            table.add_row(Text("[STORAGE]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na, thresh)
-            table.add_row(Text("[NETWORK]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na, thresh)
+            table.add_row(Text("[CPU]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na)
+            table.add_row(Text("[MEMORY]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na)
+            table.add_row(Text("[STORAGE]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na)
+            table.add_row(Text("[NETWORK]", style="cyan"), Text("[ NORMAL ]", style="dim"), wait, na, na)
             state_text = Text(f"\nEscalation State: Level {level}\nAction: {action}", style="bold green")
-            threshold_summary = Table.grid(expand=True)
-            threshold_summary.add_column("Metric", style="cyan")
-            threshold_summary.add_column("Threshold", justify="right", style="bold white")
-            for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
-                threshold_summary.add_row(name, f"{self.current_thresholds.get(name, 70.0):.1f}%")
             panel_content = Table.grid(expand=True)
             panel_content.add_row(table)
-            panel_content.add_row(Text("Current Thresholds:", style="bold white"))
-            panel_content.add_row(threshold_summary)
             panel_content.add_row(Align.center(state_text))
-            return Panel(panel_content, title="System Status", border_style="blue")
+            return Panel(panel_content, title="AI Inference", border_style="blue")
 
         def row_for(name, label, formatter):
             info = heads.get(name) or {}
             is_anomaly = bool(info.get("anomaly", False))
             value = info.get("value", 0.0)
-            baseline = info.get("baseline", 0.0)
-            deviation = info.get("deviation", 0.0)
-            threshold = info.get("threshold", 0.0)
-            in_study_zone = bool(info.get("in_study_zone", False))
-            study_active = bool(info.get("study_active", False))
-            init_mode = bool(info.get("init_mode", False))
-            if self.study_timer <= 0:
-                init_mode = False
-            site_down = bool(info.get("site_down", False)) if name == "NETWORK" else False
+            ai_score = info.get("ai_score", raw_score if raw_score is not None else 0.0)
+            confidence = info.get("confidence", 0.0)
             try:
                 value = float(value)
             except Exception:
                 value = 0.0
             try:
-                baseline = float(baseline)
+                ai_score = float(ai_score)
             except Exception:
-                baseline = 0.0
+                ai_score = 0.0
             try:
-                deviation = float(deviation)
+                confidence = float(confidence)
             except Exception:
-                deviation = abs(value - baseline)
-            try:
-                threshold = float(threshold)
-            except Exception:
-                threshold = 0.0
-            if init_mode:
-                thresh_label = f"{threshold:.1f}(I)"
-            elif study_active and threshold > 70.0:
-                thresh_label = f"{threshold:.1f}(S)"
-            else:
-                thresh_label = f"{threshold:.1f}"
+                confidence = 0.0
 
-            current_style = "green"
-            status_style = "bold green"
-            comp_style = "cyan"
-            if float(value) > float(threshold):
+            if is_anomaly:
                 current_style = "bold red"
                 status_style = "bold red"
                 comp_style = "bold red"
-            elif float(value) > 70.0 and in_study_zone:
-                current_style = "bold yellow"
-                status_style = "bold yellow"
-                comp_style = "bold yellow"
-
-            if name == "NETWORK":
-                latency_ms = 0.0
-                retrans = 0.0
-                speed_mbps = 0.0
-                try:
-                    latency_ms = float(info.get("latency_ms", 0.0) or 0.0)
-                except Exception:
-                    latency_ms = 0.0
-                try:
-                    retrans = float(info.get("retrans_per_sec", 0.0) or 0.0)
-                except Exception:
-                    retrans = 0.0
-                try:
-                    speed_mbps = float(info.get("speed_mbps", 0.0) or 0.0)
-                except Exception:
-                    speed_mbps = 0.0
-                if site_down:
-                    row_style = "bold white on bright_red blink"
-                    status = Text("[ SITE DOWN ]", style=row_style)
-                    current_text = Text("Unreachable", style=row_style)
-                    baseline_text = Text("-", style=row_style)
-                    deviation_text = Text("-", style=row_style)
-                    threshold_text = Text("-", style=row_style)
-                    comp = Text(f"[{label}]", style=row_style)
-                else:
-                    status = Text("[ ANOMALY ]" if float(value) > float(threshold) else "[ NORMAL ]", style=status_style)
-                    if speed_mbps < 1.0:
-                        pulse_value = speed_mbps * 1024.0
-                        pulse_unit = "Kbps"
-                    else:
-                        pulse_value = speed_mbps
-                        pulse_unit = "Mbps"
-                    activity_style = current_style
-                    if activity_style in ("green", "bold green") and speed_mbps > 0.0:
-                        activity_style = "bold green"
-                    current_text = Text(
-                        f"Load: {value:.1f}% | Lat: {latency_ms:.0f}ms | Ret: {retrans:.2f}/s | Pulse: {pulse_value:.2f} {pulse_unit}",
-                        style=activity_style,
-                    )
-                    baseline_text = Text(f"{baseline:.1f}%", style="dim")
-                    deviation_text = Text(f"{abs(float(deviation)):.1f}%", style="yellow")
-                    threshold_text = Text(f"{thresh_label}%", style="dim")
-                    comp = Text(f"[{label}]", style=comp_style)
+                status = Text("[ ANOMALY ]", style=status_style)
             else:
-                status = Text("[ ANOMALY ]" if float(value) > float(threshold) else "[ NORMAL ]", style=status_style)
-                current_text = Text(formatter(value), style=current_style)
-                baseline_text = Text(formatter(baseline), style="dim")
-                deviation_text = Text(f"{abs(float(deviation)):.1f}%", style="yellow")
-                threshold_text = Text(f"{thresh_label}%", style="dim")
-                comp = Text(f"[{label}]", style=comp_style)
-            table.add_row(comp, status, current_text, baseline_text, deviation_text, threshold_text)
+                current_style = "green"
+                status_style = "bold green"
+                comp_style = "cyan"
+                status = Text("[ NORMAL ]", style=status_style)
+
+            table.add_row(
+                Text(f"[{label}]", style=comp_style),
+                status,
+                Text(formatter(value), style=current_style),
+                Text(f"{ai_score:.4f}", style="dim"),
+                Text(f"{confidence:.0%}", style="yellow" if is_anomaly else "dim"),
+            )
 
         row_for("CPU", "CPU", lambda v: f"{v:.1f}%")
         row_for("MEMORY", "MEM", lambda v: f"{v:.1f}%")
@@ -376,13 +293,10 @@ class HealingDashboard:
         stab_style = "bold yellow" if remaining > 0 else "dim green"
         stab_text = Text(f"\nStabilization Window: {remaining}s remaining", style=stab_style)
 
-        if next_calibration_in is None:
-            calib_line = Text("\nNext Calibration: -", style="dim")
-        else:
-            hours = int(next_calibration_in // 3600)
-            minutes = int((next_calibration_in % 3600) // 60)
-            seconds = int(next_calibration_in % 60)
-            calib_line = Text(f"\nNext Calibration: {hours:02d}:{minutes:02d}:{seconds:02d}", style="dim cyan")
+        prediction_line = Text(
+            f"\nAI Prediction: {1 if global_anomaly else 0}  |  Model: Isolation Forest",
+            style="bold cyan" if not global_anomaly else "bold red",
+        )
 
         culprits_list = list(culprits or [])
         if culprits_list:
@@ -391,22 +305,14 @@ class HealingDashboard:
         else:
             culprits_line = Text("\nCulprits: -", style="dim")
 
-        threshold_summary = Table.grid(expand=True)
-        threshold_summary.add_column("Metric", style="cyan")
-        threshold_summary.add_column("Threshold", justify="right", style="bold white")
-        for name in ("CPU", "MEMORY", "STORAGE", "NETWORK"):
-            threshold_summary.add_row(name, f"{self.current_thresholds.get(name, 70.0):.1f}%")
-
         panel_content = Table.grid(expand=True)
         panel_content.add_row(table)
-        panel_content.add_row(Text("Current Thresholds:", style="bold white"))
-        panel_content.add_row(threshold_summary)
+        panel_content.add_row(Align.center(prediction_line))
         panel_content.add_row(Align.center(state_text))
-        panel_content.add_row(Align.center(calib_line))
         panel_content.add_row(Align.center(culprits_line))
         panel_content.add_row(Align.center(stab_text))
 
-        return Panel(panel_content, title="Decision Heads", border_style="white")
+        return Panel(panel_content, title="AI Inference", border_style="white")
 
     def _make_logs_panel(self):
         logs_text = Text()

@@ -23,8 +23,6 @@ class PolicyEngine:
         self.cache_file = os.path.join("config", "status_cache.json")
         self.system_state_file = os.path.join("config", "system_state.json")
         self.forensics_file = "anomalies_forensics.csv"
-        self.threshold_file = os.path.join("config", "threshold.json")
-        self.threshold = self._load_threshold()
         
         # Demo Mode logic
         self.demo_mode = self.mon_cfg.get('demo_mode', False)
@@ -77,8 +75,13 @@ class PolicyEngine:
         self.current_level_idx = 0
         self.current_level = 0
         self._last_notified_level = 0
-        self.required_consecutive_head_anomalies = 5
+        # AI confidence replaces multi-cycle threshold debouncing for anomaly entry.
+        self.required_consecutive_head_anomalies = 1
         self.component_counters = {"CPU": 0, "MEMORY": 0, "STORAGE": 0, "NETWORK": 0}
+
+        # Resume persisted escalation state after a restart (Memory Layer).
+        self._load_state()
+        self._load_system_state()
 
     def manual_resume(self):
         self.current_level_idx = 0
@@ -95,60 +98,6 @@ class PolicyEngine:
             self.notifier.send("✅ [INFO] Admin resumed system via 'R' key. Returning to Level 0.", min_interval_seconds=60)
         return "ADMIN_OVERRIDE: System manually resumed. Level 0 restored."
 
-    def _load_threshold(self):
-        try:
-            if os.path.exists(self.threshold_file):
-                with open(self.threshold_file, "r") as f:
-                    data = json.load(f) or {}
-                if "threshold" in data:
-                    return float(data["threshold"])
-        except Exception as e:
-            logger.error(f"Failed to load dynamic threshold: {e}")
-        return float(self.config.get("ai", {}).get("anomaly_threshold", -0.75))
-
-    def update_dynamic_threshold(self, history_file=None):
-        if not history_file:
-            history_file = os.path.join("data", "historical_scores.csv")
-        if not os.path.exists(history_file):
-            return None
-
-        scores = []
-        try:
-            with open(history_file, "r", newline="") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    try:
-                        scores.append(float(row.get("score", 0) or 0))
-                    except Exception:
-                        continue
-        except Exception as e:
-            logger.error(f"Failed to read historical scores: {e}")
-            return None
-
-        if not scores:
-            return None
-
-        avg_score = sum(scores) / len(scores)
-        max_score = max(scores)
-        new_threshold = min(max_score * 0.90, avg_score * 0.80)
-        self.threshold = float(new_threshold)
-
-        try:
-            os.makedirs(os.path.dirname(self.threshold_file), exist_ok=True)
-            payload = {
-                "threshold": self.threshold,
-                "updated_at": time.time(),
-                "avg_score": float(avg_score),
-                "max_score": float(max_score),
-                "n": int(len(scores)),
-            }
-            with open(self.threshold_file, "w") as f:
-                json.dump(payload, f, indent=2)
-        except Exception as e:
-            logger.error(f"Failed to save dynamic threshold: {e}")
-
-        return self.threshold
-        
     def _load_system_state(self):
         """Logic: Create a simple system_state.json file."""
         if os.path.exists(self.system_state_file):
@@ -321,8 +270,7 @@ class PolicyEngine:
             value_pct = float(features.get(triggered_metric, 0.0))
         except Exception:
             value_pct = 0.0
-        threshold_pct = 70.0  # Dynamic thresholds are now handled natively by the AI model
-        study_active = False
+        confidence_pct = float(anomaly.get("confidence", 0.0) or 0.0) * 100.0
 
         # Determine Anomaly Type for Routing
         mapping = {"CPU": "cpu", "MEMORY": "memory", "STORAGE": "storage", "NETWORK": "network"}
@@ -356,12 +304,11 @@ class PolicyEngine:
                     self.current_level = path[self.current_level_idx]
 
         if self.notifier:
-            learned_text = "Learned from high-load study" if study_active else "Fixed floor"
             self.notifier.send(
-                "[CRITICAL] Anomaly Sustained for 5 cycles.\n"
+                "[CRITICAL] AI anomaly detected.\n"
                 f"Metric: [{triggered_metric}]\n"
                 f"Value: {value_pct:.1f}%\n"
-                f"Limit: {threshold_pct:.1f}% ({learned_text})\n"
+                f"Confidence: {confidence_pct:.1f}%\n"
                 f"Executing Level {self.current_level} Recovery.",
                 min_interval_seconds=60,
             )

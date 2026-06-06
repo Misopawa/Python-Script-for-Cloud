@@ -2,3 +2,448 @@
 2026-04-22 10:54:22,245 - AutoHealingEngine - INFO - [ACTION] Demo Mode active. Polling interval reduced to 2s
 2026-04-22 10:54:22,245 - ai.anomaly_detector - INFO - [LEARNING] Model not found. Initializing baseline training...
 2026-04-22 10:54:22,245 - ai.train_model - INFO - [LEARNING] Loading baseline data from data/westermo/system-1.csv
+2026-06-05 23:05:45,233 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-05 23:22:20,867 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-05 23:22:20,869 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-05 23:22:20,870 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,870 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+2026-06-05 23:22:20,870 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,871 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpn9l19h1j\forensics.csv
+2026-06-05 23:22:20,880 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (89s remaining).
+2026-06-05 23:22:20,880 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+2026-06-05 23:22:20,880 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+2026-06-05 23:22:20,882 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-05 23:22:20,885 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-05 23:22:20,885 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,885 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+2026-06-05 23:22:20,885 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,887 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpqok2z06v\forensics.csv
+2026-06-05 23:22:20,897 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (89s remaining).
+2026-06-05 23:22:20,897 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+2026-06-05 23:22:20,897 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+2026-06-05 23:22:20,900 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-05 23:22:20,902 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-05 23:22:20,902 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,902 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+2026-06-05 23:22:20,902 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,902 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpiibo7zs8\forensics.csv
+2026-06-05 23:22:20,912 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (89s remaining).
+2026-06-05 23:22:20,912 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+2026-06-05 23:22:20,912 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+2026-06-05 23:22:20,915 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-05 23:22:20,917 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-05 23:22:20,917 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,917 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+2026-06-05 23:22:20,917 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-05 23:22:20,918 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp3ic9w8gm\forensics.csv
+2026-06-05 23:22:20,926 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (89s remaining).
+2026-06-05 23:22:20,926 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+2026-06-05 23:22:20,926 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpth44sn_0\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (180s remaining).
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp2c6ma_o1\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (180s remaining).
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 3] Traffic Rerouting triggered for network anomaly
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 3 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 3] Traffic Rerouting triggered for network anomaly
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp87xx_p2c\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (180s remaining).
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp_yyf26t8\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] System is currently in a stabilization window (180s remaining).
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Skipping inference and 3-cycle counter check to allow services to initialize.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [STABILIZATION] Waiting for Prometheus scraper to catch up with the newly restarted service state.
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp53i3t35o\forensics.csv
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpi2igory_\forensics.csv
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 3] Traffic Rerouting triggered for network anomaly
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 3 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 3] Traffic Rerouting triggered for network anomaly
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [SIMULATION] Updating IP tables / Nginx config to redirect traffic to backup node...
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmp7c1bcwet\forensics.csv
+1970-01-12 21:46:40,000 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:51:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:51:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 21:56:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 21:56:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [ACTION] pct exec returned rc=0; stdout=ok; stderr=
+1970-01-12 22:01:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:01:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:06:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:06:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] pct exec pkill returned rc=0; stdout=ok; stderr=
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [ACTION] Level 2 pkill succeeded; sleeping 15s for Prometheus scrape sync.
+1970-01-12 22:11:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:11:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:16:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:16:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] pct reboot returned rc=0; stdout=ok; stderr=
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.
+1970-01-12 22:21:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:21:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
+1970-01-12 22:26:40,000 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct stop returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [ACTION] pct start returned rc=0; stdout=ok; stderr=
+1970-01-12 22:26:40,000 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+1970-01-12 22:26:40,000 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in C:\Users\moham\AppData\Local\Temp\tmpzkjs781g\forensics.csv
