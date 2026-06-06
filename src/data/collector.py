@@ -8,9 +8,9 @@ import requests
 
 class DataCollector:
     PROMQL_QUERIES = {
-        "CPU": '100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[1m])) * 100)',
-        "MEMORY": '(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100',
-        "STORAGE": '(node_filesystem_size_bytes{mountpoint="/"} - node_filesystem_free_bytes{mountpoint="/"}) / node_filesystem_size_bytes{mountpoint="/"} * 100',
+        "CPU": 'scalar(node_load1{job="CT100-Web-Server"}) * 100 / count(count(node_cpu_seconds_total{job="CT100-Web-Server"}) by (cpu))',
+        "MEMORY": 'clamp_min((1 - (node_memory_MemAvailable_bytes{job="CT100-Web-Server"} / node_memory_MemTotal_bytes{job="CT100-Web-Server"})) * 100, 0)',
+        "STORAGE": '((node_filesystem_size_bytes{mountpoint="/", fstype!="rootfs", job="CT100-Web-Server"} - node_filesystem_avail_bytes{mountpoint="/", fstype!="rootfs", job="CT100-Web-Server"}) / node_filesystem_size_bytes{mountpoint="/", fstype!="rootfs", job="CT100-Web-Server"}) * 100',
         "NETWORK": 'sum(irate(node_network_receive_bytes_total{device=~"veth.*|eth.*|ens.*"}[1m]))',
     }
 
