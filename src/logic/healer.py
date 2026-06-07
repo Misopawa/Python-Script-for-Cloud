@@ -110,11 +110,16 @@ def _build_command_lookup(
 
     return {
         "CPU": {
-            1: _guest("systemctl restart nginx"),
+            # Level 1 restarts the Nginx Docker container *inside* CT 100. Routed
+            # through _tunnel because `pct` is a Proxmox host binary (not present
+            # in the guest), unlike the previous in-guest `systemctl restart`.
+            1: _tunnel(f"{PCT_BIN} exec {vmid} -- docker restart nginx"),
             2: _tunnel(
                 f"{PCT_BIN} exec {vmid} -- sh -c 'pkill -9 -f stress || true'"
             ),
-            4: _tunnel(f"{PCT_BIN} set {vmid} --cores 1 --cpulimit 0.5"),
+            # Level 4 hot-plugs additional CPU cores and memory (MB) to relieve
+            # sustained pressure that survived Levels 1–2.
+            4: _tunnel(f"{PCT_BIN} set {vmid} --cores 4 --memory 4096"),
         },
         "MEMORY": {
             1: _guest("systemctl restart nginx"),
