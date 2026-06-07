@@ -10,6 +10,7 @@ if ! command -v tmux &> /dev/null; then
 fi
 
 SESSION_NAME="auto_healing_lab"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Kill any existing session with the same name
 tmux kill-session -t "$SESSION_NAME" 2>/dev/null
@@ -21,7 +22,7 @@ tmux new-session -d -s "$SESSION_NAME" -n "Main Dashboard"
 # 2. Layout Configuration (3-Pane Strategy)
 
 # Pane 1 (Large Left): Launch the TUI
-tmux send-keys -t "$SESSION_NAME:0.0" "export PYTHONPATH=src; python3 src/main.py --tui" C-m
+tmux send-keys -t "$SESSION_NAME:0.0" "cd \"$PROJECT_ROOT\" && export PYTHONPATH=src && python3 src/main.py --tui" C-m
 
 # Split the window vertically for the right side (creating Pane 1)
 tmux split-window -h -t "$SESSION_NAME:0.0" -p 40

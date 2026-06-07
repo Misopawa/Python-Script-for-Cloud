@@ -1,8 +1,11 @@
 import os
 import time
-import pandas as pd
+import signal
+import shutil
+import textwrap
 from datetime import datetime
 from collections import deque
+from typing import List, Optional
 import sys
 import select
 import termios
@@ -37,8 +40,17 @@ class HealingDashboard:
         self.ai_confidence = 0.0
         self.ai_prediction = 0
         self.forensics_file = "anomalies_forensics.csv"
+        self.mttr_forensics_file = "mttr_forensics.csv"
+        self.mttr_seconds = None
+        self.mttr_culprit = None
+        self.remediation_logs = []
+        self.alert_locked = False
+        self.is_halted = False
+        self._terminal_width = 100
+        self._needs_reflow = True
         self._stdin_fd = None
         self._stdin_old_settings = None
+        self._install_resize_handler()
 
         # 3. Finally, initialize the visual layout
         from rich.console import Console
@@ -48,6 +60,53 @@ class HealingDashboard:
         
         # This call now has access to self.cycle_count and self.source_label
         self._setup_layout()
+
+    def _install_resize_handler(self) -> None:
+        """Hook SIGWINCH so terminal resizes trigger safe panel reflow."""
+        try:
+            signal.signal(signal.SIGWINCH, self._on_terminal_resize)
+        except (AttributeError, ValueError, OSError):
+            pass
+        self._refresh_terminal_width()
+
+    def _on_terminal_resize(self, signum, frame) -> None:
+        self._needs_reflow = True
+
+    def _refresh_terminal_width(self) -> None:
+        try:
+            size = shutil.get_terminal_size(fallback=(120, 40))
+            self._terminal_width = max(40, int(size.columns))
+        except Exception:
+            self._terminal_width = max(40, int(self._terminal_width or 100))
+
+    def poll_resize(self) -> None:
+        """Called each refresh cycle to apply pending resize reflow."""
+        self._refresh_terminal_width()
+        if self._needs_reflow:
+            self._needs_reflow = False
+
+    def _safe_str(self, value, default: str = "N/A") -> str:
+        try:
+            text = str(value) if value is not None else default
+            return text if text else default
+        except Exception:
+            return default
+
+    def _wrap_remediation_line(self, line: str, width: Optional[int] = None) -> List[str]:
+        """Wrap log lines to terminal width to avoid render/index failures."""
+        wrap_width = max(24, int(width or self._terminal_width) - 4)
+        safe_line = self._safe_str(line, "")
+        if not safe_line:
+            return []
+        try:
+            return textwrap.wrap(
+                safe_line,
+                width=wrap_width,
+                break_long_words=True,
+                break_on_hyphens=False,
+            ) or [safe_line[:wrap_width]]
+        except Exception:
+            return [safe_line[:wrap_width]]
 
     def update_metrics(self):
         """Fetches live data and refreshes the TUI panels."""
@@ -147,14 +206,14 @@ class HealingDashboard:
 
         self.layout["header"].update(self._make_header(True))
         self.layout["ai_brain"].update(Panel(Align.center(Text.from_markup("Analyzing...", style="dim")), title="AI Decision Logic", border_style="dim"))
-        self.layout["forensics"].update(Panel(Text.from_markup("System boot sequence initiated...", style="dim"), title="Anomaly Forensics (Last 10)", border_style="dim"))
+        self.layout["forensics"].update(Panel(Text.from_markup("Waiting for remediation events...", style="dim"), title="Remediation Log", border_style="dim"))
         self.refresh_operations()
         self.layout["footer"].update(self._make_footer())
 
     def generate_layout(self):
         return self.layout
 
-    def update_view(self, metrics, anomaly_score, escalation_level, action_name, stabilization_window, last_action_timestamp, is_connected=False, ui_messages=None, raw_score=None, decision_heads=None, cycle_count=None, culprits=None, next_calibration_in=None):
+    def update_view(self, metrics, anomaly_score, escalation_level, action_name, stabilization_window, last_action_timestamp, is_connected=False, ui_messages=None, raw_score=None, decision_heads=None, cycle_count=None, culprits=None, next_calibration_in=None, mttr_seconds=None, mttr_culprit=None, remediation_logs=None, alert_locked=False):
         if ui_messages:
             self.ui_messages.extend(list(ui_messages))
         if cycle_count is not None:
@@ -162,6 +221,20 @@ class HealingDashboard:
                 self.cycle_count = int(cycle_count)
             except Exception:
                 pass
+        if mttr_seconds is not None:
+            try:
+                self.mttr_seconds = float(mttr_seconds)
+            except Exception:
+                pass
+        if mttr_culprit is not None:
+            self.mttr_culprit = str(mttr_culprit)
+        if remediation_logs is not None:
+            try:
+                self.remediation_logs = list(remediation_logs)
+            except Exception:
+                pass
+        self.alert_locked = bool(alert_locked)
+        self.is_halted = bool(alert_locked)
         if escalation_level is not None:
             try:
                 self.current_healing_level = int(escalation_level)
@@ -184,16 +257,27 @@ class HealingDashboard:
             except Exception:
                 self.culprits = []
         self.layout["header"].update(self._make_header(True))
-        self.layout["ai_brain"].update(self._make_ai_brain_panel(decision_heads, escalation_level, action_name, stabilization_window, last_action_timestamp, self.culprits, raw_score))
-        self.layout["forensics"].update(self._make_logs_panel())
-        self.layout["right"].update(self._make_background_panel())
-        self.layout["footer"].update(self._make_footer())
+        try:
+            self.layout["ai_brain"].update(
+                self._make_ai_brain_panel(
+                    decision_heads, escalation_level, action_name,
+                    stabilization_window, last_action_timestamp,
+                    getattr(self, "culprits", []), raw_score,
+                )
+            )
+            self.layout["forensics"].update(self._make_logs_panel())
+            self.layout["right"].update(self._make_background_panel())
+            self.layout["footer"].update(self._make_footer())
+        except Exception:
+            fallback = Panel(Text("UI reflow recovery — retrying next cycle", style="yellow"), title="Status")
+            self.layout["forensics"].update(fallback)
         return self.layout
 
     def _make_header(self, is_connected=False):
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         node = self.config.get('proxmox', {}).get('node', 'pve')
-        vmid = self.config.get('proxmox', {}).get('vmid', '101')
+        mgmt_vmid = self.config.get('proxmox', {}).get('management_vmid', 101)
+        target_vmid = self.config.get('proxmox', {}).get('target_vmid', 100)
         
         if is_connected:
             status_text = Text(" [CONNECTED] ✔", style="bold green")
@@ -203,7 +287,11 @@ class HealingDashboard:
             title_style = "bold cyan"
             
         title = Text("AI-Powered Cloud Monitoring & Auto-Healing System", style=title_style)
-        info = Text(f" [Time: {current_time}] [Node: {node}] [VMID: {vmid}] [Cycles: {self.cycle_count}]", style="white")
+        info = Text(
+            f" [Time: {current_time}] [Node: {node}] "
+            f"[Mgmt CT: {mgmt_vmid}] [Target CT: {target_vmid}] [Cycles: {self.cycle_count}]",
+            style="white",
+        )
         
         header_content = title + status_text + info
         return Panel(Align.center(header_content), style="blue")
@@ -213,9 +301,9 @@ class HealingDashboard:
         time_diff = current_time - last_action
         remaining = max(0, int(window - time_diff)) if last_action > 0 else 0
 
-        if level >= 5:
-            content = Text("!!! MANUAL INTERVENTION REQUIRED: PRESS 'R' TO RESUME !!!", style="bold white on bright_red blink")
-            return Panel(Align.center(content, vertical="middle"), title="System Status", border_style="bright_red")
+        if level >= 5 or self.alert_locked or self.is_halted or "ALERT" in str(action):
+            content = Text("!!! HUMAN INTERVENTION REQUIRED: PRESS 'R' TO RESUME !!!", style="bold white on bright_red blink")
+            return Panel(Align.center(content, vertical="middle"), title="System Status — ALERT", border_style="bright_red")
 
         heads = decision_heads or {}
         table = Table(title="Health Grid (Isolation Forest)", expand=True, title_style="bold blue")
@@ -284,6 +372,10 @@ class HealingDashboard:
         row_for("NETWORK", "NET", lambda v: f"{v:.1f}%")
 
         state_style = "bold white"
+        if "REMEDIATING" in str(action):
+            state_style = "bold yellow blink"
+        if "ALERT" in str(action):
+            state_style = "bold white on red blink"
         if "VERIFYING" in str(action) or "WARNING" in str(action):
             state_style = "bold yellow"
         if "WARMING UP" in str(action):
@@ -316,25 +408,42 @@ class HealingDashboard:
 
     def _make_logs_panel(self):
         logs_text = Text()
-        if self.ui_messages:
-            for msg in list(self.ui_messages)[-10:]:
-                logs_text.append(str(msg) + "\n", style="dim white")
-            logs_text.append("\n")
-        if os.path.exists(self.forensics_file):
-            try:
-                df = pd.read_csv(self.forensics_file).tail(10)
-                for _, row in df.iterrows():
-                    ts = row['timestamp']
-                    score = row['anomaly_score']
-                    level = int(row['executed_level'])
-                    line = f"[{ts}] Score: {score:.4f} | Executed Level {level}\n"
-                    logs_text.append(line, style="dim white")
-            except Exception:
-                logs_text = Text("Waiting for forensic data...", style="dim")
-        else:
-            logs_text = Text("No anomalies recorded yet.", style="dim")
-            
-        return Panel(logs_text, title="Anomaly Forensics (Last 10)", border_style="white")
+        max_entries = max(1, min(12, (shutil.get_terminal_size(fallback=(80, 24)).lines // 3)))
+
+        try:
+            if self.remediation_logs:
+                entries = list(self.remediation_logs)[-max_entries:]
+                for entry in entries:
+                    status = "Success" if entry.get("success") else "Fail"
+                    metric = self._safe_str(entry.get("metric") or entry.get("culprit"))
+                    level = self._safe_str(entry.get("level", "?"))
+                    command = self._safe_str(entry.get("command"))
+                    timestamp = self._safe_str(entry.get("timestamp"))
+                    base_line = (
+                        f"[{timestamp}] | {metric} | Level {level} | {command} | {status}"
+                    )
+                    style = "bold green" if entry.get("success") else "bold red"
+                    wrapped = self._wrap_remediation_line(base_line)
+                    for idx, chunk in enumerate(wrapped):
+                        suffix = "\n" if idx == len(wrapped) - 1 else "\n"
+                        logs_text.append(chunk + suffix, style=style)
+            elif self.alert_locked or self.is_halted:
+                logs_text.append(
+                    "[HALT] Human Intervention Required — auto-healing circuit breaker engaged\n",
+                    style="bold white on red",
+                )
+            else:
+                logs_text.append("No remediation actions recorded yet.", style="dim")
+
+            if self.mttr_seconds is not None:
+                culprit = self.mttr_culprit or "UNKNOWN"
+                mttr_line = f"Latest MTTR: {float(self.mttr_seconds):.3f}s (culprit={culprit})"
+                for chunk in self._wrap_remediation_line(mttr_line):
+                    logs_text.append("\n" + chunk, style="bold cyan")
+        except Exception:
+            logs_text = Text("Remediation log reflow guard active.", style="dim")
+
+        return Panel(logs_text, title="Remediation Log", border_style="yellow")
 
     def _make_background_panel(self):
         logs = "\n".join(list(self.ui_messages)[-20:])

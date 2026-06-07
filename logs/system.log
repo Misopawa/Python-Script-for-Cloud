@@ -410,3 +410,80 @@
 2026-06-05 11:45:33,083 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
 2026-06-05 11:45:58,370 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
 2026-06-05 14:38:57,335 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:18:53,302 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:20:45,852 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:28:51,062 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:33:07,893 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:42:33,251 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:49:53,472 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:50:07,908 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-06 12:50:07,908 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:50:07,908 - healing.auto_healer - ERROR - Level 1 Service Restart failed for nginx: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:50:07,908 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:50:07,909 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:50:40,076 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+2026-06-06 12:50:40,076 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+2026-06-06 12:50:40,076 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:50:40,076 - healing.auto_healer - ERROR - Level 1 Service Restart failed for nginx: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:50:40,077 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:50:40,077 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:52:27,853 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 12:52:27,853 - healing.auto_healer - INFO - [MEMORY] Resumed System State: Level Index 0, First Anomaly: None
+2026-06-06 12:53:29,672 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 0/2)
+2026-06-06 12:53:29,672 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:53:29,672 - healing.auto_healer - ERROR - Level 1 Service Restart failed for nginx: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:53:29,672 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:53:29,672 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:54:01,802 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 1/2)
+2026-06-06 12:54:01,802 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 1/2)
+2026-06-06 12:54:01,802 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:54:01,803 - healing.auto_healer - ERROR - Level 1 Service Restart failed for nginx: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:54:01,803 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:54:01,803 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:54:33,926 - healing.auto_healer - INFO - Retrying Level 1 (Attempt 2/2)
+2026-06-06 12:54:33,926 - healing.auto_healer - WARNING - [ACTION] [Level 1] Attempting Service Restart: nginx (Retry 2/2)
+2026-06-06 12:54:33,927 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:54:33,927 - healing.auto_healer - ERROR - Level 1 Service Restart failed for nginx: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:54:33,927 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:54:33,927 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:55:06,049 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 0/1)
+2026-06-06 12:55:06,049 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:55:06,049 - healing.auto_healer - ERROR - Level 2 Process kill failed in LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:55:06,049 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:55:06,049 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:55:38,272 - healing.auto_healer - INFO - Retrying Level 2 (Attempt 1/1)
+2026-06-06 12:55:38,272 - healing.auto_healer - WARNING - [ACTION] [Level 2] Process Isolation: Hunting runaway PIDs in LXC 101 (Retry 1/1)
+2026-06-06 12:55:38,272 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:55:38,275 - healing.auto_healer - ERROR - Level 2 Process kill failed in LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:55:38,275 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:55:38,275 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:56:10,401 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+2026-06-06 12:56:10,401 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:56:10,402 - healing.auto_healer - ERROR - Proxmox soft reboot failed for LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:56:10,402 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:56:10,402 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:56:42,545 - healing.auto_healer - INFO - Retrying Level 4 (Attempt 1/1)
+2026-06-06 12:56:42,545 - healing.auto_healer - WARNING - [ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID 101)
+2026-06-06 12:56:42,545 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:56:42,545 - healing.auto_healer - ERROR - Proxmox soft reboot failed for LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:56:42,545 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:56:42,545 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:57:14,724 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+2026-06-06 12:57:14,725 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:57:14,725 - healing.auto_healer - ERROR - Proxmox hard reboot failed for LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:57:14,725 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:57:14,726 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:57:46,849 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+2026-06-06 12:57:46,849 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:57:46,849 - healing.auto_healer - ERROR - Proxmox hard reboot failed for LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:57:46,849 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:57:46,849 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 12:58:18,983 - healing.auto_healer - CRITICAL - [ACTION] [Level 5] CRITICAL: Container hard reboot (VMID 101)
+2026-06-06 12:58:18,983 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:58:18,984 - healing.auto_healer - ERROR - Proxmox hard reboot failed for LXC 101: [Errno 2] No such file or directory: '/usr/sbin/pct'
+2026-06-06 12:58:18,984 - healing.auto_healer - WARNING - [TELEGRAM] Missing telegram configuration; skipping alert.
+2026-06-06 12:58:18,984 - healing.auto_healer - INFO - [RESEARCH] Forensic snapshot recorded in anomalies_forensics.csv
+2026-06-06 13:07:09,479 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 13:07:09,480 - healing.auto_healer - INFO - [MEMORY] Resumed System State: Level Index 0, First Anomaly: None
+2026-06-06 13:13:02,821 - healing.auto_healer - INFO - [ACTION] Demo Mode active. Cooldown reduced to 30s
+2026-06-06 13:13:02,822 - healing.auto_healer - INFO - [MEMORY] Resumed System State: Level Index 0, First Anomaly: None
