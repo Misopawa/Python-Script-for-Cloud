@@ -1,20 +1,50 @@
-AI-Based Cloud Server Monitoring & Auto-Healing System
+# AI-Powered Cloud Monitoring and Auto-Healing System
 
-This project implements a hybrid cloud server monitoring system that combines traditional threshold-based monitoring with AI-based anomaly detection using the Isolation Forest algorithm. The objective of the system is to detect abnormal server behavior, reduce downtime, and automatically trigger recovery actions without human intervention. The system is designed to align with Industry 4.0 principles, focusing on intelligent automation, reliability, and real-time monitoring of server infrastructure.
+An intelligent, hybrid cloud server monitoring and remediation system that combines traditional time-series monitoring with unsupervised machine learning. Built to align with Industry 4.0 principles, this system detects abnormal server behavior, reduces downtime, and automatically triggers native hypervisor recovery actions without human intervention.
 
-The system monitors four main components of a server: CPU, memory, disk, and network. CPU, memory, and disk resources are monitored using both threshold-based rules and AI-based anomaly detection. Threshold-based monitoring provides fast and interpretable alerts when resource usage exceeds predefined limits, while the Isolation Forest model detects unusual behavior patterns that cannot be easily identified using static thresholds alone. Network monitoring is handled using threshold-based detection only, as network metrics such as packet drops and errors are cumulative and highly bursty, making them less suitable for Isolation Forest without advanced preprocessing.
+## 📖 Overview
+This project demonstrates the integration of artificial intelligence into traditional server administration. It monitors core infrastructure components (CPU, Memory, Disk, and Network) utilizing a decoupled microservices architecture. 
 
-The AI anomaly detection model is trained using a processed version of the Westermo industrial dataset. The dataset is first preprocessed to extract relevant numerical features and stored in CSV format before being used to train the Isolation Forest model. Once trained, the model is saved and loaded during runtime to detect anomalies in real-time system metrics.
+While threshold-based monitoring handles predictable network bursts, CPU, memory, and disk resources are evaluated using an **Isolation Forest** anomaly detection model. This allows the system to distinguish between legitimate workload spikes and genuine faults (like rogue processes or memory leaks) that static thresholds often miss.
 
-The system follows a modular project structure to ensure scalability and maintainability. System metrics are collected using the psutil library, stored in CSV format for logging and analysis, and evaluated against predefined thresholds. When an anomaly or threshold breach is detected, the system triggers an auto-healing mechanism that simulates recovery actions such as service restarts or system stabilization. All system events, alerts, and recovery actions are logged for monitoring and evaluation purposes.
+## 🎯 Project Scope & Methodology
+Developed using the **Iterative and Incremental Development Model**, the core scope of this system focuses on testing and validating the AI anomaly detection model using mock datasets that represent system performance metrics in a cloud monitoring environment. 
 
-The configuration of the system is managed through a YAML configuration file. This file defines CPU, memory, disk, and network thresholds, as well as paths for datasets, models, and log files. Network thresholds are defined using reasonable average values that represent acceptable server conditions, allowing warnings to be triggered only when network behavior deviates significantly from normal operation.
+## 🏗️ System Architecture
+The system operates on a continuous **SENSE-LEARN-THINK-ACT** loop across a decoupled environment (a Management Node and a Target LXC Node):
 
-To run the system, the Westermo dataset is first preprocessed, followed by training the Isolation Forest model. After training is complete, the main monitoring program is executed. During execution, the system continuously collects metrics, logs data, performs threshold checks, applies AI-based anomaly detection, and triggers auto-healing when required.
+* **SENSE (Data Collection):** Continuous, lightweight monitoring is achieved using pull-based Prometheus exporter agents, visualizing the time-series data via Grafana.
+* **LEARN & THINK (AI Anomaly Detection):** The AI model is trained on a processed version of the Westermo industrial dataset. Using the `sklearn` Isolation Forest algorithm (with a static 0.05 contamination rate), the system dynamically evaluates multivariate metrics to flag anomalies in real-time.
+* **ACT (Auto-Healing):** When an anomaly is detected, a stateful orchestrator executes a non-linear escalation matrix via Proxmox (`pct`) and Docker pass-through commands to stabilize the target container.
 
-This project demonstrates the integration of artificial intelligence into traditional server monitoring systems and highlights how AI can enhance fault detection and recovery in cloud and industrial environments. It is suitable for academic evaluation, Final Year Project submission, and as a foundation for future enhancements such as dashboard visualization, distributed monitoring, and intelligent recovery optimization.
+## 🛡️ The 5-Tier Auto-Healing Matrix
+To ensure safe and effective recovery, the system tracks retries and escalates remediation actions progressively:
+* **Level 1 (Service Restart):** Lightweight Docker container restart (e.g., `docker restart nginx`).
+* **Level 2 (Process Reset):** Aggressive termination of rogue processes (e.g., `pkill -9 stress-ng`).
+* **Level 3 (Network Traffic Throttling):** Injection of rate-limiting rules to mitigate potential network flood attacks (e.g., `iptables` connection throttling).
+* **Level 4 (Stopgap Resource Allocation):** Dynamic hot-plugging of hypervisor resources (e.g., `pct set -cores 4`) to buy time without crashing the host.
+* **Level 5 (Circuit Breaker):** Halts the auto-healer and issues a Critical Alert for Human-in-the-Loop (HITL) Root Cause Analysis.
 
-Author: Mohamad Syahmi
-Bachelor Degree in Network Computing
-Final Year Project – AI-Powered Cloud Monitoring and Auto-Healing System
+*(Note: A mandatory 15-second metric synchronization delay is enforced after actions to allow Prometheus to scrape the recovered state).*
 
+## ⚙️ Configuration & Execution
+System parameters are managed via a centralized YAML configuration file, which defines paths for datasets, model exports, and logging directories.
+
+**Execution Flow:**
+1. Preprocess the Westermo dataset.
+2. Train and export the Isolation Forest model.
+3. Boot the Proxmox target containers.
+4. Execute the main orchestrator (`main.py`) to begin the SENSE-LEARN-THINK-ACT cycle.
+
+## 💻 Tech Stack
+* **Language:** Python 3.x
+* **AI/ML:** Scikit-Learn (Isolation Forest), Pandas
+* **Monitoring:** Prometheus, Grafana, Node Exporter
+* **Infrastructure:** Proxmox VE (LXC Containers), Docker
+* **Automation:** Native Bash & Subprocess Execution
+
+## 🎓 Academic Context
+This project was developed for academic evaluation as a Final Year Project submission, establishing a foundation for future enhancements in AIOps, distributed multi-region monitoring, and intelligent recovery optimization.
+
+**Author:** Mohamad Syahmi
+**Degree:** Bachelor's Degree in Computer Science with Honours (Network Computing)
