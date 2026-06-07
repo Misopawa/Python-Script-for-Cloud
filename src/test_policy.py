@@ -42,7 +42,7 @@ COMPONENT_PATHS: Dict[str, List[int]] = {
 LEVEL_ACTIONS: Dict[int, Dict[str, object]] = {
     1: {
         "label": "Restart Service",
-        "command_markers": ("systemctl", "restart"),
+        "command_markers": ("docker", "restart"),
         "forbidden_markers": ("pkill", "traffic_reroute"),
     },
     2: {
@@ -57,7 +57,7 @@ LEVEL_ACTIONS: Dict[int, Dict[str, object]] = {
     },
     4: {
         "label": "Resource Isolation",
-        "command_markers": ("pct", "reboot"),
+        "command_markers": ("pct", "stop", "start"),
         "forbidden_markers": ("pkill", "traffic_reroute"),
     },
     5: {
