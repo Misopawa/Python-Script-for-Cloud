@@ -483,41 +483,63 @@ class PolicyEngine:
         mon_infra = self.policy_cfg.get('monitoring_infrastructure', [])
         docker_containers = self.policy_cfg.get('docker_containers', [])
 
+        # Mandatory Level 1 synchronization delay (seconds). Allows the Docker
+        # container to fully cycle and gives Prometheus (15s scrape interval) time
+        # to pull fresh, post-recovery telemetry before Level 2 is evaluated.
+        LEVEL_1_SYNC_DELAY = 20
+
         if level == 1:
-            logger.warning(f"[ACTION] [Level 1] Attempting Service Restart: {service_name} (Retry {self.retries}/{self.max_retries_per_level[1]})")
+            # 'nginx' is the Dockerized workload container name; falls back to the
+            # configured service_name if the container is renamed in the codebase.
+            docker_container = self.mon_cfg.get('docker_container', service_name) or "nginx"
+            logger.warning(
+                f"[ACTION] [Level 1] Attempting Dockerized Service Restart: "
+                f"container '{docker_container}' inside LXC {self.vmid} "
+                f"(Retry {self.retries}/{self.max_retries_per_level[1]})"
+            )
             self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 1 remediation for LXC {self.vmid}.")
 
-            if service_name in docker_containers:
-                if self._verified_docker_restart(service_name):
-                    self.last_action_timestamp = time.time()
-                    self.STABILIZATION_WINDOW = 90
-                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
-                    return "docker_restart_success"
-                self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
-                return "docker_restart_verification_failed"
-
-            # Native host-level exec using /usr/sbin/pct
+            # Level 1 (Service Restart - Dockerized): pct exec <vmid> -- docker restart <container>
+            cmd = ["/usr/sbin/pct", "exec", str(self.vmid), "--", "docker", "restart", docker_container]
+            level_start = time.time()
             try:
-                cmd = ["/usr/sbin/pct", "exec", str(self.vmid), "--", "systemctl", "restart", service_name]
-                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=15)
-                logger.info(f"[ACTION] pct exec returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
-                time.sleep(5)
-                if proc.returncode == 0 and self._verify_service_with_backoff(service_name, docker_containers, max_wait_sec=60):
-                    self.last_action_timestamp = time.time()
-                    self.STABILIZATION_WINDOW = 90
-                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
-                    return "pct_exec_restart_success"
-                if proc.returncode == 0:
-                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
-                    return "pct_exec_verification_failed"
+                logger.info(f"[ACTION] [Level 1] Executing: {' '.join(cmd)}")
+                proc = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=15)
+                logger.info(
+                    f"[ACTION] pct exec docker restart returned rc={proc.returncode}; "
+                    f"stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}"
+                )
+
+                # Mandatory synchronization delay immediately after execution.
+                logger.info(
+                    f"[MTTR] [Level 1] Sleeping {LEVEL_1_SYNC_DELAY}s for Docker container cycle + "
+                    f"Prometheus scrape (15s interval) before evaluating Level 2 escalation."
+                )
+                wait_start = time.time()
+                time.sleep(LEVEL_1_SYNC_DELAY)
+                actual_wait = time.time() - wait_start
+                logger.info(
+                    f"[MTTR] [Level 1] Synchronization delay complete: waited {actual_wait:.2f}s "
+                    f"(target {LEVEL_1_SYNC_DELAY}s). Total Level 1 latency so far: {time.time() - level_start:.2f}s."
+                )
+
+                self.last_action_timestamp = time.time()
+                self.STABILIZATION_WINDOW = 90
+                self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 1 successful. System stabilized.")
+                return "docker_restart_success"
+            except subprocess.CalledProcessError as e:
+                logger.error(
+                    f"Level 1 Dockerized restart failed for '{docker_container}' "
+                    f"(rc={e.returncode}); stdout={(e.stdout or '').strip()}; stderr={(e.stderr or '').strip()}"
+                )
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
-                return "pct_exec_restart_failed"
+                return "docker_restart_failed"
             except subprocess.TimeoutExpired:
-                logger.error(f"Level 1 Service Restart timed out for {service_name}")
+                logger.error(f"Level 1 Dockerized restart timed out for '{docker_container}'")
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "pct_exec_timeout"
             except Exception as e:
-                logger.error(f"Level 1 Service Restart failed for {service_name}: {e}")
+                logger.error(f"Level 1 Dockerized restart encountered an unexpected error for '{docker_container}': {e}")
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 1 failed. Escalating to next tier.")
                 return "pct_exec_restart_failed"
 
@@ -560,35 +582,78 @@ class PolicyEngine:
             return "traffic_reroute_simulated"
 
         elif level == 4:
-            logger.warning(f"[ACTION] [Level 4] Resource Isolation & Container Soft Reboot (VMID {self.vmid})")
+            # Mandatory Level 4 delays (seconds).
+            #  - LEVEL_4_STOP_BUFFER: brief settle window between stop and start.
+            #  - LEVEL_4_BOOT_DELAY: lets the LXC fully boot its OS, initialize the
+            #    Docker daemon, spin up the Nginx container, and allow Prometheus to
+            #    establish a clean baseline scrape.
+            LEVEL_4_STOP_BUFFER = 5
+            LEVEL_4_BOOT_DELAY = 35
+
+            logger.warning(f"[ACTION] [Level 4] Container State Reset / Namespace Isolation (VMID {self.vmid})")
             self._send_telegram_alert(f"⚠️ <b>[AIOps Alert]</b> Triggering Level 4 remediation for LXC {self.vmid}.")
+
+            level_start = time.time()
             try:
-                # Soft reboot via pct
-                cmd = ["/usr/sbin/pct", "reboot", str(self.vmid)]
-                proc = subprocess.run(cmd, capture_output=True, text=True, check=False, timeout=20)
-                logger.info(f"[ACTION] pct reboot returned rc={proc.returncode}; stdout={proc.stdout.strip()}; stderr={proc.stderr.strip()}")
-                # Wait for OS boot after soft reboot
-                time.sleep(45)
-                if proc.returncode == 0 and self._verify_service_with_backoff(service_name, docker_containers, max_wait_sec=120):
-                    # OS boot logic: 4. Intelligence for Level 4 (Reboot) - Extended 120s window
-                    self.last_action_timestamp = time.time()
-                    self.STABILIZATION_WINDOW = 120
-                    logger.info("[ACTION] Level 4 reboot triggered. Extending stabilization window to 120s for OS boot.")
-                    self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 4 successful. System stabilized.")
-                    return "lxc_soft_reboot"
-                if proc.returncode == 0:
-                    self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
-                    return "lxc_reboot_verification_failed"
+                # Level 4 (Container State Reset): pct stop <vmid>
+                stop_cmd = ["/usr/sbin/pct", "stop", str(self.vmid)]
+                logger.info(f"[ACTION] [Level 4] Executing: {' '.join(stop_cmd)}")
+                proc_stop = subprocess.run(stop_cmd, capture_output=True, text=True, check=True, timeout=20)
+                logger.info(
+                    f"[ACTION] pct stop returned rc={proc_stop.returncode}; "
+                    f"stdout={proc_stop.stdout.strip()}; stderr={proc_stop.stderr.strip()}"
+                )
+
+                # Brief buffer between stop and start.
+                logger.info(f"[MTTR] [Level 4] Sleeping {LEVEL_4_STOP_BUFFER}s buffer between stop and start...")
+                buffer_start = time.time()
+                time.sleep(LEVEL_4_STOP_BUFFER)
+                logger.info(
+                    f"[MTTR] [Level 4] Stop/start buffer complete: waited "
+                    f"{time.time() - buffer_start:.2f}s (target {LEVEL_4_STOP_BUFFER}s)."
+                )
+
+                # Level 4 (Container State Reset): pct start <vmid>
+                start_cmd = ["/usr/sbin/pct", "start", str(self.vmid)]
+                logger.info(f"[ACTION] [Level 4] Executing: {' '.join(start_cmd)}")
+                proc_start = subprocess.run(start_cmd, capture_output=True, text=True, check=True, timeout=20)
+                logger.info(
+                    f"[ACTION] pct start returned rc={proc_start.returncode}; "
+                    f"stdout={proc_start.stdout.strip()}; stderr={proc_start.stderr.strip()}"
+                )
+
+                # Mandatory boot delay immediately after the start command.
+                logger.info(
+                    f"[MTTR] [Level 4] Sleeping {LEVEL_4_BOOT_DELAY}s for LXC OS boot, Docker daemon init, "
+                    f"Nginx container spin-up, and Prometheus baseline scrape."
+                )
+                boot_start = time.time()
+                time.sleep(LEVEL_4_BOOT_DELAY)
+                logger.info(
+                    f"[MTTR] [Level 4] Boot delay complete: waited {time.time() - boot_start:.2f}s "
+                    f"(target {LEVEL_4_BOOT_DELAY}s). Total Level 4 latency so far: {time.time() - level_start:.2f}s."
+                )
+
+                self.last_action_timestamp = time.time()
+                self.STABILIZATION_WINDOW = 120
+                logger.info("[ACTION] Level 4 state reset complete. Extending stabilization window to 120s for OS boot.")
+                self._send_telegram_alert(f"✅ <b>[AIOps Resolved]</b> Level 4 successful. System stabilized.")
+                return "lxc_state_reset_success"
+            except subprocess.CalledProcessError as e:
+                logger.error(
+                    f"Level 4 Container State Reset failed for LXC {self.vmid} "
+                    f"(rc={e.returncode}); stdout={(e.stdout or '').strip()}; stderr={(e.stderr or '').strip()}"
+                )
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
-                return "lxc_soft_reboot_failed"
+                return "lxc_state_reset_failed"
             except subprocess.TimeoutExpired:
-                logger.error(f"Proxmox soft reboot timed out for LXC {self.vmid}")
+                logger.error(f"Level 4 Container State Reset timed out for LXC {self.vmid}")
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
                 return "lxc_reboot_timeout"
             except Exception as e:
-                logger.error(f"Proxmox soft reboot failed for LXC {self.vmid}: {e}")
+                logger.error(f"Level 4 Container State Reset failed for LXC {self.vmid}: {e}")
                 self._send_telegram_alert(f"❌ <b>[AIOps Failed]</b> Level 4 failed. Escalating to next tier.")
-                return "lxc_soft_reboot_failed"
+                return "lxc_state_reset_failed"
 
         elif level == 5:
             logger.critical(f"[ACTION] [Level 5] CRITICAL: Container hard reboot (VMID {self.vmid})")

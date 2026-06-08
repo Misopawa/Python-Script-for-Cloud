@@ -19,13 +19,31 @@ The system operates on a continuous **SENSE-LEARN-THINK-ACT** loop across a deco
 
 ## 🛡️ The 5-Tier Auto-Healing Matrix
 To ensure safe and effective recovery, the system tracks retries and escalates remediation actions progressively:
-* **Level 1 (Service Restart):** Lightweight Docker container restart (e.g., `docker restart nginx`).
+* **Level 1 (Service Restart - Dockerized):** Lightweight Docker container restart inside the target LXC (`pct exec 100 -- docker restart nginx`), followed by a mandatory 20-second synchronization delay so the container can cycle and Prometheus (15-second scrape interval) can pull fresh post-recovery telemetry before Level 2 is evaluated.
 * **Level 2 (Process Reset):** Aggressive termination of rogue processes (e.g., `pkill -9 stress-ng`).
 * **Level 3 (Network Traffic Throttling):** Injection of rate-limiting rules to mitigate potential network flood attacks (e.g., `iptables` connection throttling).
-* **Level 4 (Stopgap Resource Allocation):** Dynamic hot-plugging of hypervisor resources (e.g., `pct set -cores 4`) to buy time without crashing the host.
+* **Level 4 (Container State Reset / Namespace Isolation):** Full LXC state reset via `pct stop 100`, a brief 5-second buffer, then `pct start 100`, followed by a mandatory 35-second boot delay to let the LXC boot its OS, initialize the Docker daemon, spin up the Nginx container, and allow Prometheus to establish a clean baseline scrape.
 * **Level 5 (Circuit Breaker):** Halts the auto-healer and issues a Critical Alert for Human-in-the-Loop (HITL) Root Cause Analysis.
 
-*(Note: A mandatory 15-second metric synchronization delay is enforced after actions to allow Prometheus to scrape the recovered state).*
+*(Note: Synchronization delays are enforced after Level 1 (20s) and Level 4 (35s) actions to allow Prometheus to scrape the recovered state. Exact wait times are logged to the console for Mean Time To Recovery (MTTR) tracking).*
+
+## 🚀 Quick Install (Installation Kit)
+A self-contained installation kit takes you from a freshly downloaded repository to a running program — no manual code changes required. It creates an isolated virtual environment, installs all dependencies, and **verifies the installation**.
+
+```bash
+# Linux / macOS
+chmod +x install/install.sh install/run.sh   # first time only
+./install/install.sh        # clean install + verification
+./install/run.sh            # run (console)   |   ./install/run.sh --tui  (dashboard)
+```
+
+```bat
+REM Windows
+install\install.bat         REM clean install + verification
+install\run.bat             REM run (console) |   install\run.bat --tui  (dashboard)
+```
+
+Re-verify at any time with `python install/verify_installation.py`. See **[INSTALL.md](INSTALL.md)** for the full User Manual (prerequisites, verification details, and troubleshooting).
 
 ## ⚙️ Configuration & Execution
 System parameters are managed via a centralized YAML configuration file, which defines paths for datasets, model exports, and logging directories.
