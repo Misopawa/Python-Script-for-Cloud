@@ -27,6 +27,24 @@ To ensure safe and effective recovery, the system tracks retries and escalates r
 
 *(Note: Synchronization delays are enforced after Level 1 (20s) and Level 4 (35s) actions to allow Prometheus to scrape the recovered state. Exact wait times are logged to the console for Mean Time To Recovery (MTTR) tracking).*
 
+## 🚀 Quick Install (Installation Kit)
+A self-contained installation kit takes you from a freshly downloaded repository to a running program — no manual code changes required. It creates an isolated virtual environment, installs all dependencies, and **verifies the installation**.
+
+```bash
+# Linux / macOS
+chmod +x install/install.sh install/run.sh   # first time only
+./install/install.sh        # clean install + verification
+./install/run.sh            # run (console)   |   ./install/run.sh --tui  (dashboard)
+```
+
+```bat
+REM Windows
+install\install.bat         REM clean install + verification
+install\run.bat             REM run (console) |   install\run.bat --tui  (dashboard)
+```
+
+Re-verify at any time with `python install/verify_installation.py`. See **[INSTALL.md](INSTALL.md)** for the full User Manual (prerequisites, verification details, and troubleshooting).
+
 ## ⚙️ Configuration & Execution
 System parameters are managed via a centralized YAML configuration file, which defines paths for datasets, model exports, and logging directories.
 
